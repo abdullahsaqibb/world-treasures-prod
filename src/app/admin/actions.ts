@@ -82,7 +82,7 @@ export async function createCatalogProduct(form:FormData){
   await tx.inventory.create({data:{variantId:variant.id,onHand:stock,reserved:0}});
  });
  revalidatePath("/admin/products");revalidatePath("/admin");
- const {redirect}=await import("next/navigation");redirect("/admin/products/"+encodeURIComponent(id));
+ return id;
 }
 export async function updateCatalogProduct(form:FormData){
  await requireAdmin();
@@ -150,4 +150,32 @@ export async function saveStorefrontCopy(form:FormData){
   }
  });
  revalidatePath("/admin/storefront");revalidatePath("/");
+}
+
+/** Form actions that return client-safe, actionable feedback instead of generic 500 pages. */
+export type CatalogFormState={ok:boolean;message:string;productId?:string};
+function catalogError(error:unknown):string{
+ const e=error as {code?:string;message?:string;meta?:{target?:string[]}};
+ if(e?.code==="P2002"){
+  const target=(e.meta?.target??[]).join(" ").toLowerCase();
+  if(target.includes("sku"))return "This SKU is already used by another item. Enter a different product code.";
+  if(target.includes("slug"))return "This product URL is already used. Try a different handle.";
+  return "A product already uses one of these identifiers. Check the SKU or URL.";
+ }
+ const message=e?.message??"";
+ const allowedPrefixes=["Enter ","Invalid ","Stock ","Choose ","Please ","Product ","SKU ","Amount ","Image ","Text ","Unknown "];
+ if(allowedPrefixes.some(prefix=>message.startsWith(prefix)))return message;
+ return "We couldn't save your changes. Please try again. If this continues, contact the store administrator.";
+}
+export async function createCatalogProductState(_previous:CatalogFormState,form:FormData):Promise<CatalogFormState>{
+ try {
+  const id=await createCatalogProduct(form);
+  return {ok:true,message:"Your draft product was created successfully.",productId:id};
+ }catch(error){return {ok:false,message:catalogError(error)};}
+}
+export async function updateCatalogProductState(_previous:CatalogFormState,form:FormData):Promise<CatalogFormState>{
+ try {
+  await updateCatalogProduct(form);
+  return {ok:true,message:"Product changes saved successfully."};
+ }catch(error){return {ok:false,message:catalogError(error)};}
 }
