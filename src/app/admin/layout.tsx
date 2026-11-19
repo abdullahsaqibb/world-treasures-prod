@@ -7,6 +7,7 @@ const links = [
  { href:"/admin", symbol:"◫",label:"Overview"},
  { href:"/admin/products",symbol:"▣",label:"All products"},
  { href:"/admin/products/new",symbol:"+",label:"Add product"},
+ { href:"/admin/categories",symbol:"◈",label:"Categories"},
  { href:"/admin/orders",symbol:"▤",label:"Orders"},
  { href:"/admin/customers",symbol:"♙",label:"Customers"},
  { href:"/admin/delivery",symbol:"⇢",label:"Delivery & shipping"},
