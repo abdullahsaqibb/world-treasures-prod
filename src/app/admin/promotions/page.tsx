@@ -1,0 +1,4 @@
+import {ensureAdminPage} from "@/lib/admin-access";
+import {AdminFeaturePage} from "../AdminFeaturePage";
+export const dynamic="force-dynamic";
+export default async function Page(){await ensureAdminPage();return <AdminFeaturePage eyebrow="marketing / campaigns" title="Promotions & discounts" description="Discounts should be simple to configure and preview before activation." icon="ticket" items={[{"title":"Discount codes","detail":"Percentage or fixed-value discounts with usage limits and dates"},{"title":"Automatic promotions","detail":"Cart total, product or category conditions"},{"title":"Free shipping offers","detail":"Thresholds, cities and promotion periods"},{"title":"Promotion reporting","detail":"Track redemptions and revenue impact"}]} note="Discount engines will be enabled with the validated checkout pipeline."/>;}
