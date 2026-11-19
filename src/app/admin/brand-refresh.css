@@ -1,0 +1,76 @@
+/* WT Admin identity — inherits the approved storefront's paper, ink, and orange.
+   Intentionally restrained interactions; no scroll-bound animation. */
+.wt-admin{--navy:#13243d;--ink:#13243d;--muted:#697487;--line:#dedfdc;--bg:#faf7ee;--accent:#ef6943;--orange:#ef6943;--surface:#fffdf8;background:var(--bg);font-family:"DM Sans",Arial,sans-serif;color:var(--ink)}
+.wt-admin .wt-admin-sidebar{background:#14243a;border-right:1px solid #25374a;padding:22px 12px 17px}
+.wt-admin .wt-admin-brand{gap:10px;padding:3px 11px 25px}
+.wt-admin .wt-admin-logomark{width:47px;height:47px;display:block;position:relative;background:#f9f5e9;color:#14243a;border:0;border-radius:8px;font-size:20px;letter-spacing:-2px;transform:rotate(-5deg);font-family:"Bricolage Grotesque",sans-serif;line-height:47px;text-align:center;box-shadow:5px 5px 0 #e9673e}
+.wt-admin .wt-admin-logomark span{color:#ef6943}
+.wt-admin .wt-admin-brand strong{letter-spacing:.035em;font-size:14px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800}.wt-admin .wt-admin-brand small{font-size:10px;letter-spacing:.1em;color:#a1afbb;text-transform:uppercase}
+.wt-admin .wt-nav-link{border-radius:7px;min-height:43px;color:#c5cdd6}.wt-admin .wt-nav-link.is-active{background:#f9f5e9;color:#13243d;box-shadow:none;font-weight:800}.wt-admin .wt-nav-link.is-active svg{color:#ed633b}.wt-admin .wt-nav-link small{color:#bbc7d4}
+.wt-admin .wt-admin-topbar{background:#fffdf7;border-bottom:1px solid #e6e1d6;min-height:77px;box-shadow:none}
+.wt-admin .wt-admin-global-search{background:#faf7ee;border-color:#e6dfd2;border-radius:8px;height:42px}.wt-admin .wt-admin-create{background:#ed633b;color:#fff!important;border-radius:6px;min-height:42px;padding:11px 16px}.wt-admin .wt-admin-create:hover{background:#d9512d}.wt-admin .wt-admin-viewstore{border-radius:6px;border-color:#e0ddd5;background:white;min-height:42px}
+.wt-admin .wt-admin-avatar{background:#162741;border:1px solid #162741;color:#fff}
+.wt-admin .wt-body{padding-top:34px;background:#faf7ee}
+.wt-admin .wt-eyebrow{color:#dc5835;letter-spacing:.17em;font-size:10px;font-weight:900}
+.wt-admin h1{font-family:"Bricolage Grotesque","DM Sans",sans-serif!important;font-weight:850!important;letter-spacing:-.035em!important;line-height:1.04!important}
+.wt-admin h2{font-family:"Bricolage Grotesque","DM Sans",sans-serif!important;font-weight:800!important;letter-spacing:-.025em!important}
+.wt-admin h3{font-family:"Bricolage Grotesque","DM Sans",sans-serif!important;font-weight:750!important}
+.wt-admin .wt-lede{line-height:1.6!important;color:#6d7480}
+.wt-admin .wt-hero-panel{background:#f0dbff;border-radius:14px;border:1px solid #dec5ed;color:#14243a;min-height:244px;padding:33px 36px;box-shadow:0 8px 26px #3722380a}
+.wt-admin .wt-hero-panel:after{border-color:#9255b91e;box-shadow:0 0 0 54px #8b49a508,0 0 0 120px #8b49a509}
+.wt-admin .wt-hero-panel h1{font-family:"Bricolage Grotesque",sans-serif!important;color:#13243d!important;max-width:630px;font-size:clamp(29px,3.2vw,45px)!important;letter-spacing:-.05em!important;line-height:1.03!important}
+.wt-admin .wt-hero-panel p{color:#48536c!important;max-width:570px;font-size:13px;line-height:1.7!important}
+.wt-admin .wt-hero-panel .wt-eyebrow{color:#9958a3}.wt-admin .wt-hero-panel .wt-btn{background:#13243d!important;color:#fff!important}
+.wt-admin .wt-kpi{background:#fffefa;border-radius:12px;border:1px solid #e4ddd0;box-shadow:none;padding:21px 22px}
+.wt-admin .wt-kpi-label{color:#626b78;font-size:11px;letter-spacing:.02em}
+.wt-admin .wt-kpi-num{font-size:34px;color:#17263d}.wt-admin .wt-kpi-icon{border-radius:8px;background:#ffe9df;color:#dd633e}
+.wt-admin .wt-card,.wt-admin .wt-stat,.wt-admin .wt-shortcut{background:#fffefa;border:1px solid #e4ddd0;border-radius:12px;box-shadow:none}
+.wt-admin .wt-card{padding:25px}.wt-admin .wt-cardhead{padding-bottom:12px;border-bottom:1px solid #ede8dd;margin-bottom:16px}
+.wt-admin .wt-cardhead h2{font-size:20px!important}
+.wt-admin .wt-action-list a{border:1px solid #eee7dc;background:#fffaf0;border-radius:9px;padding:15px}
+.wt-admin .wt-action-list a:hover{border-color:#ea9574;background:#fff6e9}
+.wt-admin .wt-action-icon{background:#f4e0ff;color:#764aa3;border-radius:8px}
+.wt-admin .wt-action-arrow{color:#ec653b!important}
+.wt-admin .wt-setup-check{background:#ddf4d1;color:#316331}
+.wt-admin .wt-setup-step.pending .wt-setup-check{background:#ffeddc;color:#c66b32}
+.wt-admin .wt-btn{border-radius:7px;transition:background-color .15s,border-color .15s}
+.wt-admin .wt-btn.orange,.wt-admin .wt-btn:not(.light){background:#14243a;color:white!important}
+.wt-admin .wt-btn.orange:hover,.wt-admin .wt-btn:not(.light):hover{background:#2a3d57}
+.wt-admin .wt-btn.light{background:#fffefa;border:1px solid #ddd7cb;color:#1d3046!important}
+.wt-admin .wt-badge{border-radius:5px;letter-spacing:.015em}
+.wt-admin .wt-badge.amber{background:#fff0dd;color:#9b591e}.wt-admin .wt-badge.green{background:#e8f4de;color:#3b7030}.wt-admin .wt-badge.red{background:#ffebe4;color:#ae3f25}
+.wt-admin .wt-help{background:#fff3e5;border-color:#f5dac0;color:#7e4d2c;border-radius:9px}
+.wt-admin .wt-table th{background:#faf5eb;color:#70717a;letter-spacing:.08em}.wt-admin .wt-table td{border-bottom-color:#eee9e0}
+.wt-admin .wt-table tr:hover td{background:#fffcf5}
+.wt-admin .wt-field{color:#283648}.wt-admin .wt-field input,.wt-admin .wt-field select,.wt-admin .wt-field textarea{background:#fffefa;border:1px solid #dad8d2;border-radius:7px;min-height:44px}
+.wt-admin .wt-field input:focus,.wt-admin .wt-field select:focus,.wt-admin .wt-field textarea:focus,.wt-admin .wt-admin-global-search:focus-within{outline:2px solid #ec633a58;outline-offset:1px}
+.wt-admin .wt-setup-timeline{gap:18px}.wt-admin .wt-shortcut{border-radius:10px}.wt-admin .wt-shortcut:hover{border-color:#eb805a}
+.wt-admin .wt-product img{background:#f9f2e8;border-radius:7px}
+.wt-admin .wt-feature-row{border-radius:8px}
+.wt-admin .wt-feature-header-icon{background:#f2dfff;color:#6d3f95}
+.wt-admin .wt-state-pill{background:#fef0da;color:#98631d}
+.wt-admin .wt-admin-content{max-width:1520px}
+.wt-admin .wt-dashboard-masthead{display:flex;gap:13px;align-items:center;margin-bottom:19px;font-size:12px;color:#6e7481}
+.wt-admin .wt-dashboard-masthead .wt-dashboard-dot{width:8px;height:8px;background:#ed633b;border-radius:50%}
+.wt-admin .wt-product-editor-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(265px,340px);gap:21px;align-items:start}
+.wt-admin .wt-product-editor-main{display:grid;gap:17px}
+.wt-admin .wt-product-editor-main>.wt-card{margin:0}
+.wt-admin .wt-product-editor-side{position:sticky;top:95px;display:grid;gap:17px}
+.wt-admin .wt-product-editor-side>.wt-card{margin:0}
+.wt-admin .wt-product-preview{display:grid;gap:10px;text-align:center;padding:18px 13px;border-radius:8px;background:#f9f4e9;border:1px dashed #ded2ba}
+.wt-admin .wt-product-preview img{height:165px;max-width:100%;margin:auto;object-fit:contain}
+.wt-admin .wt-product-preview-placeholder{display:grid;place-items:center;min-height:165px;font-size:12px;color:#86909c}
+.wt-admin .wt-product-preview strong{font-size:15px;font-family:"Bricolage Grotesque",sans-serif}
+.wt-admin .wt-product-preview small{color:#737782}
+.wt-admin .wt-review-points{display:grid;gap:13px;margin:14px 0 0;padding:0;list-style:none}
+.wt-admin .wt-review-points li{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:#495366;line-height:1.5}
+.wt-admin .wt-review-points li>span{color:#dd633e;font-weight:900}
+.wt-admin .wt-editor-savebar{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;position:sticky;bottom:14px;padding:14px 17px;background:#fffefa;border:1px solid #e1d9c9;box-shadow:0 8px 30px #27334317;border-radius:9px;z-index:4}
+.wt-admin .wt-editor-savebar>small{color:#6e7782;font-size:11px}
+.wt-admin .wt-editor-savebar .wt-actions{margin-left:auto}
+.wt-admin .wt-product-topline{display:flex;gap:8px;align-items:center;margin:0 0 9px}
+.wt-admin .wt-product-topline .wt-badge{font-size:10px}
+@media(max-width:1080px){.wt-admin .wt-product-editor-grid{grid-template-columns:minmax(0,1fr) 275px}}
+@media(max-width:900px){.wt-admin .wt-product-editor-grid{grid-template-columns:1fr}.wt-admin .wt-product-editor-side{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}.wt-admin .wt-hero-panel{padding:26px}}
+@media(max-width:610px){.wt-admin .wt-hero-panel h1{font-size:30px!important}.wt-admin .wt-product-editor-side{grid-template-columns:1fr}.wt-admin .wt-editor-savebar{bottom:0;border-radius:8px}.wt-admin .wt-card{padding:17px}.wt-admin .wt-admin-brand strong{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.wt-admin *{transition:none!important;scroll-behavior:auto!important}}
