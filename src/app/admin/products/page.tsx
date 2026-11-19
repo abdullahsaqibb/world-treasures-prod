@@ -1,24 +1,47 @@
-import { ensureAdminPage } from "@/lib/admin-access";
-import { db } from "@/lib/db";
+import {ensureAdminPage} from "@/lib/admin-access";
+import {db} from "@/lib/db";
 import Link from "next/link";
+import type {Prisma} from "@prisma/client";
 export const dynamic="force-dynamic";
-export default async function ProductsPage({searchParams}:{searchParams:Promise<{q?:string;status?:string}>}){
+type Filter={q?:string;status?:string;category?:string;stock?:string;verified?:string;sort?:string;page?:string};
+function queryString(filters:Filter,updates:Filter={}){const p=new URLSearchParams();const combined={...filters,...updates};Object.entries(combined).forEach(([k,v])=>{if(v&&v!=="all")p.set(k,v)});return p.toString();}
+export default async function ProductsPage({searchParams}:{searchParams:Promise<Filter>}){
  await ensureAdminPage();
- const {q="",status="all"}=await searchParams;
- const query=q.trim().slice(0,80);
- const products=await db.product.findMany({
- where:{...(query?{OR:[{name:{contains:query,mode:"insensitive"}},{slug:{contains:query,mode:"insensitive"}}]}:{}),...(status==="draft"?{status:"DRAFT"}:status==="archived"?{status:"ARCHIVED"}:{})},
- include:{category:true,images:{take:1,orderBy:{sortOrder:"asc"}},variants:{take:1,include:{inventory:true}}},orderBy:{updatedAt:"desc"},take:200
- });
- const [all,drafts,archived]=await Promise.all([db.product.count(),db.product.count({where:{status:"DRAFT"}}),db.product.count({where:{status:"ARCHIVED"}})]);
- const tabs=[{label:"All products",val:"all",count:all},{label:"Drafts",val:"draft",count:drafts},{label:"Archived",val:"archived",count:archived}];
- return <div><span className="wt-eyebrow">Inventory & merchandising</span><div className="wt-head"><div><h1>Product catalog</h1><p className="wt-lede">Create products, manage prices and stock, and review listing information. Changes are saved to the development catalog.</p></div><Link className="wt-btn orange" href="/admin/products/new">＋ Add new product</Link></div>
- <div className="wt-card"><div className="wt-cardhead"><h2>Products <span className="wt-muted">({all})</span></h2><div className="wt-actions">{tabs.map(t=><Link key={t.val} className={"wt-btn "+(status===t.val?"":"light")} href={"/admin/products?status="+t.val+(query?"&q="+encodeURIComponent(query):"")}>{t.label} ({t.count})</Link>)}</div></div>
- <form method="get" style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:16}}><input className="wt-search" name="q" placeholder="Search product names or URL slugs..." defaultValue={query}/><input name="status" type="hidden" value={status}/><button className="wt-btn" type="submit">Search</button>{query&&<Link className="wt-btn light" href="/admin/products">Clear</Link>}</form>
- <div className="wt-tablewrap"><table className="wt-table"><thead><tr><th>Product</th><th>Category</th><th>Price (ZAR)</th><th>Stock</th><th>Status</th><th>Verified</th><th></th></tr></thead><tbody>
- {products.map(p=>{const v=p.variants[0];const stock=v?.inventory?.onHand??0;return <tr key={p.id}><td><div className="wt-product">{p.images[0]&&p.images[0].url.startsWith("/")?<img src={p.images[0].url} alt=""/>:<span className="wt-badge">No photo</span>}<div><strong>{p.name}</strong><small>{v?.sku??"No SKU"}</small></div></div></td><td>{p.category.name}</td><td>R {((v?.priceCents??0)/100).toFixed(2)}</td><td><span className={"wt-badge "+(stock<=5?"red":"")}>{stock} units</span></td><td><span className={"wt-badge "+(p.status==="ACTIVE"?"green":"amber")}>{p.status.toLowerCase()}</span></td><td>{p.verified?<span className="wt-badge green">Verified</span>:<span className="wt-badge amber">Needs review</span>}</td><td><Link className="wt-btn light" href={"/admin/products/"+encodeURIComponent(p.id)}>Edit →</Link></td></tr>})}
+ const f=await searchParams,query=(f.q??"").trim().slice(0,80);
+ const filter={q:query,status:["draft","active","archived"].includes(f.status??"")?f.status:"all",category:f.category??"all",stock:["low","out","available"].includes(f.stock??"")?f.stock:"all",verified:["yes","no"].includes(f.verified??"")?f.verified:"all",sort:f.sort==="name"?"name":"recent"};
+ const categories=await db.category.findMany({orderBy:{name:"asc"},select:{id:true,name:true}});
+ const categoryId=categories.some(c=>c.id===filter.category)?filter.category:undefined;
+ const where:Prisma.ProductWhereInput={
+  ...(query?{OR:[{name:{contains:query,mode:"insensitive"}},{slug:{contains:query,mode:"insensitive"}},{variants:{some:{sku:{contains:query,mode:"insensitive"}}}}]}:{}),
+  ...(filter.status==="draft"?{status:"DRAFT"}:filter.status==="active"?{status:"ACTIVE"}:filter.status==="archived"?{status:"ARCHIVED"}:{}),
+  ...(categoryId?{categoryId}:{}),
+  ...(filter.verified==="yes"?{verified:true}:filter.verified==="no"?{verified:false}:{}),
+  ...(filter.stock==="out"?{variants:{some:{inventory:{is:{onHand:0}}}}}:filter.stock==="low"?{variants:{some:{inventory:{is:{onHand:{gt:0,lte:5}}}}}}:filter.stock==="available"?{variants:{some:{inventory:{is:{onHand:{gt:5}}}}}}:{})
+ };
+ const pageInput=Number(f.page),page=Number.isSafeInteger(pageInput)&&pageInput>0?Math.min(pageInput,100000):1,pageSize=25;
+ const [products,matching,all,drafts,archived,unverified]=await Promise.all([
+ db.product.findMany({where,include:{category:true,images:{take:1,orderBy:{sortOrder:"asc"}},variants:{take:1,include:{inventory:true}}},orderBy:filter.sort==="name"?[{name:"asc"}]:[{updatedAt:"desc"}],take:pageSize,skip:(page-1)*pageSize}),
+ db.product.count({where}),db.product.count(),db.product.count({where:{status:"DRAFT"}}),
+ db.product.count({where:{status:"ARCHIVED"}}),db.product.count({where:{verified:false}})
+ ]);
+ const tabs=[{label:"All",val:"all",count:all},{label:"Drafts",val:"draft",count:drafts},{label:"Archived",val:"archived",count:archived}];
+ const next=page*pageSize<matching;
+ return <div><span className="wt-eyebrow">MERCHANDISE / CATALOG</span><div className="wt-head"><div><h1>Your product collection.</h1><p className="wt-lede">Review, organize and manage product listings. Search by product name, URL or SKU.</p></div><div className="wt-actions"><Link className="wt-btn light" href="/api/admin/products/export">↓ Export CSV</Link><Link className="wt-btn orange" href="/admin/products/new">＋ Add product</Link></div></div>
+ <div className="wt-grid"><div className="wt-stat"><small>Total products</small><b>{all}</b><span>Development catalog</span></div><div className="wt-stat"><small>Unverified listings</small><b>{unverified}</b><span>Need supplier or label confirmation</span></div><div className="wt-stat"><small>Draft listings</small><b>{drafts}</b><span>Not published to customers</span></div><div className="wt-stat"><small>Archived</small><b>{archived}</b><span>Stored in the catalog</span></div></div>
+ <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">CATALOG LIBRARY</span><h2>Manage your products <span className="wt-muted">({matching} matching)</span></h2></div><div className="wt-actions">{tabs.map(t=><Link className={"wt-btn "+(filter.status===t.val?"":"light")} key={t.val} href={"/admin/products?"+queryString(filter,{status:t.val,page:"1"})}>{t.label} ({t.count})</Link>)}</div></div>
+ <form method="get" className="wt-catalog-filters" aria-label="Filter product catalog">
+  <label className="wt-field"><span>Search</span><input name="q" type="search" defaultValue={query} placeholder="Name, barcode or SKU…"/></label>
+  <label className="wt-field"><span>Category</span><select name="category" defaultValue={categoryId??"all"}><option value="all">All categories</option>{categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+  <label className="wt-field"><span>Stock</span><select name="stock" defaultValue={filter.stock}><option value="all">Any stock</option><option value="available">6+ units</option><option value="low">Low stock (1–5)</option><option value="out">Out of stock</option></select></label>
+  <label className="wt-field"><span>Verification</span><select name="verified" defaultValue={filter.verified}><option value="all">All statuses</option><option value="yes">Verified</option><option value="no">Needs review</option></select></label>
+  <label className="wt-field"><span>Sort</span><select name="sort" defaultValue={filter.sort}><option value="recent">Recently updated</option><option value="name">Name A–Z</option></select></label>
+  <input type="hidden" name="status" value={filter.status}/><div className="wt-catalog-filter-actions"><button className="wt-btn orange" type="submit">Apply filters</button><Link className="wt-btn light" href="/admin/products">Reset</Link></div>
+ </form>
+ <div className="wt-tablewrap"><table className="wt-table"><thead><tr><th scope="col">Product</th><th scope="col">Category</th><th scope="col">Price</th><th scope="col">On hand</th><th scope="col">Status</th><th scope="col">Verified</th><th scope="col">Actions</th></tr></thead><tbody>
+ {products.map(p=>{const v=p.variants[0],stock=v?.inventory?.onHand??0;return <tr key={p.id}><td><div className="wt-product">{p.images[0]&&p.images[0].url.startsWith("/")?<img src={p.images[0].url} alt="" loading="lazy"/>:<span className="wt-badge">No photo</span>}<div><strong>{p.name}</strong><small>{v?.sku??"No SKU"}</small></div></div></td><td>{p.category.name}</td><td>R {((v?.priceCents??0)/100).toFixed(2)}</td><td><span className={"wt-badge "+(stock<=5?"red":"")}>{stock} units</span></td><td><span className={"wt-badge "+(p.status==="ACTIVE"?"green":"amber")}>{p.status.toLowerCase()}</span></td><td>{p.verified?<span className="wt-badge green">Verified</span>:<span className="wt-badge amber">Needs review</span>}</td><td><Link className="wt-btn light" href={"/admin/products/"+encodeURIComponent(p.id)}>Edit →</Link></td></tr>})}
  </tbody></table></div>
- {products.length===0&&<div className="wt-empty"><h3>No matching products</h3><p>Try a different search or add the first product.</p><Link className="wt-btn orange" href="/admin/products/new">Add product</Link></div>}
- </div><div className="wt-help"><strong>Before going live:</strong> Draft inventory and prices still need client verification. The live storefront currently uses the separately approved product content; it does not automatically update from this catalog yet.</div>
+ {products.length===0&&<div className="wt-empty"><h3>No matching products</h3><p>Try changing filters, or create a new item.</p><Link className="wt-btn orange" href="/admin/products/new">Add a product →</Link></div>}
+ <div className="wt-table-pagination"><span>Showing {products.length?((page-1)*pageSize+1):0}–{Math.min(page*pageSize,matching)} of {matching} products</span><div className="wt-actions">{page>1&&<Link className="wt-btn light" href={"/admin/products?"+queryString(filter,{page:String(page-1)})}>← Previous</Link>}{next&&<Link className="wt-btn light" href={"/admin/products?"+queryString(filter,{page:String(page+1)})}>Next →</Link>}</div></div>
+ </section><div className="wt-help"><strong>Development only:</strong> Imported inventory and prices are provisional. These records are not automatically reflected on the approved public storefront.</div>
  </div>;
 }
