@@ -43,3 +43,73 @@ export async function updateDeliveryRate(form:FormData){
  await db.shippingRate.update({where:{id:rateId},data:{feeCents,active}});
  revalidatePath("/admin/delivery");
 }
+
+function optionalText(value:FormDataEntryValue|null,max=1500) {
+ const result=String(value??"").trim();if(result.length>max)throw new Error("Text too long");return result;
+}
+function slugify(value:string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
+function imagePath(value:string){
+ if(!value)return null;
+ if(value.startsWith("/")&&!value.startsWith("//")&&!/\s/.test(value))return value;
+ if(/^https:\/\/[^\s]+$/i.test(value))return value;
+ throw new Error("Image must be a secure https URL or a local /products/... path");
+}
+export async function createCatalogProduct(form:FormData){
+ await requireAdmin();
+ const name=clean(form.get("name"),150);
+ const slug=slugify(clean(form.get("slug"),150));
+ if(!slug)throw new Error("Please provide a valid product URL slug");
+ const categoryId=clean(form.get("categoryId"),128);
+ const sku=clean(form.get("sku"),100).toUpperCase();
+ if(!/^[A-Z0-9][A-Z0-9._-]*$/.test(sku))throw new Error("SKU may contain letters, numbers, dots, dashes and underscores");
+ const priceCents=money(form.get("priceZar"));
+ const stock=qty(form.get("stock"));
+ const description=optionalText(form.get("description"),3000);
+ const image=imagePath(optionalText(form.get("image"),1200));
+ const weight=optionalText(form.get("weightGrams"),12);
+ const weightGrams=weight?qty(weight):null;
+ const category=await db.category.findUnique({where:{id:categoryId}});
+ if(!category)throw new Error("Choose a valid category");
+ const id=crypto.randomUUID();
+ await db.$transaction(async tx=>{
+  await tx.product.create({data:{id,name,slug,description,categoryId,status:"DRAFT",verified:false}});
+  if(image)await tx.productImage.create({data:{productId:id,url:image,alt:name}});
+  const variant=await tx.productVariant.create({data:{productId:id,sku,label:"Standard",priceCents,weightGrams}});
+  await tx.inventory.create({data:{variantId:variant.id,onHand:stock,reserved:0}});
+ });
+ revalidatePath("/admin/products");revalidatePath("/admin");
+ const {redirect}=await import("next/navigation");redirect("/admin/products/"+encodeURIComponent(id));
+}
+export async function updateCatalogProduct(form:FormData){
+ await requireAdmin();
+ const id=clean(form.get("productId"),128);
+ const name=clean(form.get("name"),150);
+ const slug=slugify(clean(form.get("slug"),150));
+ if(!slug)throw new Error("Please provide a valid product URL slug");
+ const categoryId=clean(form.get("categoryId"),128);
+ const priceCents=money(form.get("priceZar"));
+ const stock=qty(form.get("stock"));
+ const description=optionalText(form.get("description"),3000);
+ const image=imagePath(optionalText(form.get("image"),1200));
+ const weight=optionalText(form.get("weightGrams"),12);
+ const weightGrams=weight?qty(weight):null;
+ const sku=clean(form.get("sku"),100).toUpperCase();
+ if(!/^[A-Z0-9][A-Z0-9._-]*$/.test(sku))throw new Error("SKU may contain letters, numbers, dots, dashes and underscores");
+ const status=form.get("status")==="ARCHIVED"?"ARCHIVED":"DRAFT";
+ const verified=form.get("verified")==="on";
+ const existing=await db.product.findUnique({where:{id},include:{variants:{include:{inventory:true},take:1},images:{orderBy:{sortOrder:"asc"},take:1}}});
+ if(!existing?.variants[0])throw new Error("Product not found");
+ const variant=existing.variants[0];
+ if(stock<(variant.inventory?.reserved??0))throw new Error("Stock cannot be lower than quantity already reserved");
+ if(!await db.category.findUnique({where:{id:categoryId}}))throw new Error("Choose a valid category");
+ await db.$transaction(async tx=>{
+  await tx.product.update({where:{id},data:{name,slug,description,categoryId,status,verified}});
+  await tx.productVariant.update({where:{id:variant.id},data:{sku,priceCents,weightGrams}});
+  await tx.inventory.upsert({where:{variantId:variant.id},create:{variantId:variant.id,onHand:stock,reserved:0},update:{onHand:stock}});
+  const prior=existing.images[0];
+  if(image&&prior)await tx.productImage.update({where:{id:prior.id},data:{url:image,alt:name}});
+  else if(image)await tx.productImage.create({data:{productId:id,url:image,alt:name}});
+  else if(prior)await tx.productImage.delete({where:{id:prior.id}});
+ });
+ revalidatePath("/admin");revalidatePath("/admin/products");revalidatePath("/admin/products/"+encodeURIComponent(id));
+}
