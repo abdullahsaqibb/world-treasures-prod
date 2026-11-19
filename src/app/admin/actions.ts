@@ -113,3 +113,19 @@ export async function updateCatalogProduct(form:FormData){
  });
  revalidatePath("/admin");revalidatePath("/admin/products");revalidatePath("/admin/products/"+encodeURIComponent(id));
 }
+
+export async function createCategory(form:FormData){
+ await requireAdmin();
+ const name=clean(form.get("name"),90);
+ const slug=slugify(optionalText(form.get("slug"),90)||name);
+ if(!slug)throw new Error("Invalid category slug");
+ await db.category.create({data:{name,slug}});
+ revalidatePath("/admin/categories");revalidatePath("/admin/products/new");revalidatePath("/admin/products");
+}
+export async function renameCategory(form:FormData){
+ await requireAdmin();
+ const id=clean(form.get("categoryId"),128);
+ const name=clean(form.get("name"),90);
+ await db.category.update({where:{id},data:{name}});
+ revalidatePath("/admin/categories");revalidatePath("/admin/products");
+}
