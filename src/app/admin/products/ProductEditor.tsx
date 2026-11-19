@@ -2,12 +2,14 @@
 import Link from "next/link";
 import {useState} from "react";
 import {createCatalogProduct,updateCatalogProduct} from "../actions";
+import {PendingSubmit} from "../PendingSubmit";
 type CategoryOption={id:string;name:string};
 type ProductData={id:string;name:string;slug:string;description:string|null;verified:boolean;status:"DRAFT"|"ACTIVE"|"ARCHIVED";categoryId:string;image:string;sku:string;priceCents:number;stock:number;reserved:number;weightGrams:number|null};
 export default function ProductEditor({categories,product}:{categories:CategoryOption[],product?:ProductData}){
  const editing=Boolean(product);
  const [name,setName]=useState(product?.name??"");
  const [image,setImage]=useState(product?.image??"");
+ const [imageFailed,setImageFailed]=useState(false);
  const [categoryId,setCategoryId]=useState(product?.categoryId??"");
  const [price,setPrice]=useState(product?(product.priceCents/100).toFixed(2):"");
  const [stock,setStock]=useState(String(product?.stock??0));
@@ -37,7 +39,7 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
   </section>
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">STEP 03 / PHOTOGRAPHY</span><h2>Make it look irresistible</h2></div><span className="wt-badge">Image</span></div>
    <p className="wt-lede">For now, add a secure image URL or an existing product image path. A proper upload library is the next backend feature.</p>
-   <label className="wt-field">Main product image<small>Image preview updates automatically on the right</small><input name="image" maxLength={1200} value={image} onChange={e=>setImage(e.target.value)} placeholder="/products/takis.webp or https://…"/></label>
+   <label className="wt-field">Main product image<small>Image preview updates automatically on the right</small><input name="image" maxLength={1200} value={image} onChange={e=>{setImage(e.target.value);setImageFailed(false);}} placeholder="/products/takis.webp or https://…"/></label>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">STEP 04 / QUALITY CONTROL</span><h2>Review the listing</h2></div></div>
    <p className="wt-help">Saving here does not publish to the live store. The development catalog and production storefront are separate while checkout and product verification are unfinished.</p>
@@ -49,7 +51,7 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
  </div>
  <aside className="wt-product-editor-side">
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">REAL-TIME PREVIEW</span><h2>Product card</h2></div></div>
-   <div className="wt-product-preview">{image&&imageAllowed?<img src={image} alt="Preview of product" onError={e=>{e.currentTarget.style.visibility="hidden"}}/>:<div className="wt-product-preview-placeholder">Your product photo will appear here</div>}<small>{selectedCategory}</small><strong>{name||"Your product name"}</strong><b>R {Number.isFinite(Number(price))?Number(price||0).toFixed(2):"0.00"}</b></div>
+   <div className="wt-product-preview">{image&&imageAllowed&&!imageFailed?<img src={image} alt="Preview of product" onError={()=>setImageFailed(true)}/>:<div className="wt-product-preview-placeholder">{imageFailed?"Image could not be loaded — check the URL":"Your product photo will appear here"}</div>}<small>{selectedCategory}</small><strong>{name||"Your product name"}</strong><b>R {Number.isFinite(Number(price))?Number(price||0).toFixed(2):"0.00"}</b></div>
    <p className="wt-lede" style={{fontSize:12,marginTop:14}}>Preview of the development listing, not a public product page.</p>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><h2>Before you save</h2></div><ul className="wt-review-points">
@@ -61,7 +63,7 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
   </ul></section>
  </aside>
  </div>
- <div className="wt-editor-savebar"><small>Changes are saved to the <strong>development</strong> catalog.</small><div className="wt-actions"><Link className="wt-btn light" href="/admin/products">Cancel</Link><button className="wt-btn orange" type="submit">{editing?"Save product changes":"Save as draft →"}</button></div></div>
+ <div className="wt-editor-savebar"><small>Changes are saved to the <strong>development</strong> catalog.</small><div className="wt-actions"><Link className="wt-btn light" href="/admin/products">Cancel</Link><PendingSubmit pendingText={editing?"Saving product…":"Creating draft…"}>{editing?"Save product changes":"Save as draft →"}</PendingSubmit></div></div>
  </form></div>;
 
 }
