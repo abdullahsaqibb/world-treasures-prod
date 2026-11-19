@@ -3,7 +3,7 @@
 This branch leaves the approved public storefront intact. The database and admin routes are separate until catalog integration is approved.
 
 ## 1. Database
-Create a PostgreSQL database (Neon recommended). Set DATABASE_URL to its pooled URL and DIRECT_URL to its direct non-pooled URL.
+Connect the existing Neon project (org-fragrant-meadow-50249321 / round-river-52997667) on the production branch. Set DATABASE_URL to its pooled URL and DATABASE_URL_UNPOOLED to its direct non-pooled URL.
 Run `npm install`, `npx prisma generate`, and `npx prisma migrate dev --name init` on a development database. Commit the migration before production deployment. Production uses `npx prisma migrate deploy`.
 Run `npm run seed:prototype` to import **exactly the existing 15 products** as DRAFT, with unverified prototype prices and stock. The seed preserves later admin edits on reruns.
 
@@ -23,3 +23,6 @@ This initial admin foundation does not collect PayFast credentials, accept payme
 
 ## 5. Review
 Verify role denial with unlisted GitHub accounts, empty database migration, seed idempotence, editing prices and city fees, and the shipping quote endpoint in a preview environment. Then integrate database products into the storefront as a separate tested change.
+
+## Existing Neon project configuration
+The Neon CLI provides DATABASE_URL and DATABASE_URL_UNPOOLED. Configure those in Vercel Preview for testing, then Production after approving migration. The application uses Prisma 6, and its directUrl uses DATABASE_URL_UNPOOLED. Do not paste database URLs or credentials into chat. Login is publicly reachable at /admin/login; every protected admin page and mutation separately checks the allowlist.
