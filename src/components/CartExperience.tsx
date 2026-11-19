@@ -79,8 +79,31 @@ export function CartExperience(){
  const productsGrid=<div className="wt-cart-shop-grid">{products.map(p=><article className="wt-cart-product" key={p.id}>
  <div className="wt-cart-product-image"><img src={p.image} alt={p.name}/></div><div className="wt-cart-product-info"><span>{p.category}</span><h3>{p.name}</h3><p>{zar(p.priceCents)}</p><button type="button" onClick={()=>add(p)}>＋ Add to bag</button></div></article>)}</div>;
  const basketDetails=<div className="wt-cart-popup-shade" onClick={()=>setExpanded(false)} role="presentation"><section className="wt-cart-popup" role="dialog" aria-modal="true" aria-label="Products inside your basket" onClick={e=>e.stopPropagation()}><div className="wt-cart-popup-head"><div><strong>Inside your basket</strong><span>{count} {count===1?"item":"items"} selected</span></div><button type="button" aria-label="Close basket details" onClick={()=>setExpanded(false)}>×</button></div>{itemList(false)}<div className="wt-cart-total"><span>Products subtotal</span><strong>{zar(total)}</strong></div><button className="wt-cart-primary" onClick={()=>setExpanded(false)}>Back to your bag</button></section></div>;
- const bagContents=<div className="wt-cart-panel">
- {items.length? <><p className="wt-cart-help">Review the products in your bag and adjust quantities before checkout.</p>{itemList(true)}<div className="wt-cart-total"><span>Subtotal</span><strong>{zar(total)}</strong></div><div className="wt-cart-bag-bottom"><p className="wt-cart-bag-label">YOUR ORDER, PACKED TOGETHER</p><button type="button" className="wt-cart-basket-toggle wt-cart-bag-basket" aria-label="Open the products inside your basket" aria-expanded={expanded} onClick={()=>setExpanded(true)}><span className={bagOpen?"wt-cart-basket-animate":""}>{basket}</span><strong>Tap to open your basket</strong><span>See all {count} {count===1?"item":"items"} inside ↗</span></button></div><p className="wt-cart-disclaimer">Prototype prices only. Delivery calculated separately. No real order is placed.</p><button className="wt-cart-primary" onClick={startCheckout}>Review your order →</button>{expanded&&basketDetails}</>:<div className="wt-cart-blank"><div className="wt-cart-empty-icon">🛍️</div><h3>Your bag is empty</h3><p>Find something delicious and add it to your basket.</p><button onClick={()=>{setBagOpen(false);document.getElementById("shop")?.scrollIntoView({behavior:"smooth"})}}>Explore snacks →</button></div>}
+ const bagContents=<div className="wt-cart-panel wt-cart-page">
+ {items.length? <><div className="cart-page-layout">
+  <section className="wt-bag-items" aria-label="Products in your bag">
+   <p className="cart-caption">{count} {count===1?"item":"items"} in your bag</p>
+   {itemList(true)}
+   <button className="wt-bag-back-shopping" type="button" onClick={()=>{setBagOpen(false);document.getElementById("shop")?.scrollIntoView({behavior:"smooth"})}}>← Continue shopping</button>
+  </section>
+  <aside className="order-summary wt-bag-order-summary" aria-label="Order summary">
+   <h3>ORDER SUMMARY</h3>
+   <div className="wt-bag-summary-row"><span>Subtotal</span><strong>{zar(total)}</strong></div>
+   <p>Delivery calculated at checkout.<br/>Store collection is free.</p>
+   <p className="wt-bag-delivery-note">Delivery rates are confirmed during checkout.</p>
+   <button className="wt-cart-primary" type="button" onClick={startCheckout}>Checkout →</button>
+   <div className="wt-bag-payfast"><strong>Payfast</strong><small>Card payments only</small></div>
+   <p className="wt-cart-disclaimer">Prototype checkout. No payment or order is sent.</p>
+   <div className="wt-cart-bag-bottom">
+    <p className="wt-cart-bag-label">YOUR ORDER, PACKED TOGETHER</p>
+    <button type="button" className="wt-cart-basket-toggle wt-cart-bag-basket" aria-label="Open the products inside your basket" aria-expanded={expanded} onClick={()=>setExpanded(true)}>
+     <span className={bagOpen?"wt-cart-basket-animate":""}>{basket}</span>
+     <strong>What's in your bag?</strong>
+     <span>Click to see all {count} {count===1?"item":"items"} inside ↗</span>
+    </button>
+   </div>
+  </aside>
+ </div>{expanded&&basketDetails}</>:<div className="wt-cart-blank"><div className="wt-cart-empty-icon">🛍️</div><h3>Your bag is empty</h3><p>Find something delicious and add it to your basket.</p><button onClick={()=>{setBagOpen(false);document.getElementById("shop")?.scrollIntoView({behavior:"smooth"})}}>Explore snacks →</button></div>}
  </div>;
  const checkoutContents=<div className="wt-cart-checkout">
  <div className="wt-cart-progress"><span className={step==="bag"?"current":""}>01 · Bag</span><span className={step==="delivery"?"current":""}>02 · Delivery</span><span className={step==="payment"?"current":""}>03 · Payment</span></div>
