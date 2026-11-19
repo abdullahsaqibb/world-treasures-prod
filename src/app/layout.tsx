@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { initialTheme } from "@/data/initial-theme-inline";
 export const metadata: Metadata = {
   title: "World Treasures | Imported Snacks & Drinks",
   description: "Imported snacks and drinks at World Treasures.",
   icons: { icon: "/brand/favicon.webp" }
 };
-const initialTheme = readFileSync(join(process.cwd(),"src/data/initial-theme.js"),"utf8");
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en" suppressHydrationWarning><head>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
