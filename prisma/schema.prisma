@@ -180,3 +180,11 @@ model PaymentEvent {
  verified Boolean @default(false)
  createdAt DateTime @default(now())
 }
+
+/** Editable storefront copy. Drafts stay separate from published text. */
+model StoreContent {
+ key String @id
+ draftValue String
+ publishedValue String?
+ updatedAt DateTime @updatedAt
+}
