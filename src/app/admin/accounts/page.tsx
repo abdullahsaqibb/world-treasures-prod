@@ -1,0 +1,4 @@
+import {ensureAdminPage} from "@/lib/admin-access";
+import {AdminFeaturePage} from "../AdminFeaturePage";
+export const dynamic="force-dynamic";
+export default async function Page(){await ensureAdminPage();return <AdminFeaturePage eyebrow="identity / security" title="Customer sign-in" description="Offer easy customer access while preserving the option to purchase as a guest." icon="lock" items={[{"title":"Guest checkout","detail":"Complete purchases without requiring account creation"},{"title":"Google sign-in","detail":"OAuth with verified account linking and consent"},{"title":"Email sign-in","detail":"One-time email links for customers without Google"},{"title":"Account area","detail":"Orders, addresses, tracking, and preferences"},{"title":"Security","detail":"Rate limits, verified redirects, secure sessions and data privacy"}]} note="Customer identity must remain isolated from staff GitHub authentication and administrative permissions."/>;}
