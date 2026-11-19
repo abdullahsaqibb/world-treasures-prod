@@ -1,8 +1,10 @@
+import { ensureAdminPage } from "@/lib/admin-access";
 import { db } from "@/lib/db";
 import { saveDeliveryCity,updateDeliveryRate } from "../actions";
 export const dynamic="force-dynamic";
 const input={padding:"9px 11px",border:"1px solid #cbd0d3",borderRadius:6,maxWidth:"100%"};
 export default async function DeliveryPage(){
+ await ensureAdminPage();
  const cities=await db.city.findMany({include:{rates:{where:{service:"STANDARD"},orderBy:{createdAt:"desc"},take:1}},orderBy:[{province:"asc"},{name:"asc"}]});
  return <section><h1>Delivery fees by city</h1><p>Enter courier-provided rates in ZAR. No city is available for customer checkout until it has an active rate.</p>
  <form action={saveDeliveryCity} style={{display:"flex",flexWrap:"wrap",gap:12,alignItems:"end",padding:18,background:"white",borderRadius:10}}>
