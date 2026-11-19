@@ -1,51 +1,41 @@
-# World Treasures — Production Migration (Phase 1)
+# World Treasures — React parity migration
 
-This is a new **Next.js + TypeScript storefront**, migrated from the approved `World_Treasures_Mobile_Header_Pinch_Responsive.zip` prototype. It is NOT the existing single-file HTML prototype, and **it is not yet a live ecommerce website**.
+This is the **visual parity migration** of `World_Treasures_Mobile_Header_Pinch_Responsive.zip`, the explicitly approved HTML source. It deliberately **does not redesign** the hero, layout, animations, product names, or theme system.
 
-## Three agreed phases
-
-1. **Frontend** — preserve the 15 exact prototype products and images, the product-themed hero, single-product swipe controls, product-to-inspection handoff (downwards only), product inspection tilt/pinch zoom, 6 footer themes, desktop/mobile fixed header, and flying-to-cart animation. Implement responsive testing and refine loader separately. This starter implements the interactive storefront, but full visual/real-device acceptance testing remains outstanding. The heavy prototype loader is intentionally **not** transferred until an approved production animation is designed.
-2. **Database + admin + commerce** — PostgreSQL via Neon, Prisma, Auth.js, protected role-based admin dashboard, product CRUD, image uploads, inventory, order state machine, customer addresses and cart persistence. Initial migration seeds the 15 prototype items but does NOT treat their quantities/prices as authoritative live stock.
-3. **Delivery + PayFast + launch** — admin-configured shipping fees by destination city, authoritative server-side quotes, guest checkout, stock reservation, signed PayFast checkout, server-verified ITN, emails, QA and launch. Merchant credentials are added **last** and must never be checked into git.
-
-## Start locally
-
-Requires Node.js 20.9+ with a working npm registry connection.
+## Run
 
 ```bash
 npm install
 npm run dev
+npm run typecheck
+npm run build
 ```
 
-Visit http://localhost:3000. To build for Vercel, run `npm run build`; the framework preset is Next.js. GitHub/Vercel deployment has **not** been performed for this deliverable.
+Deploy on Vercel with framework preset **Next.js** (remove the old static-site Vercel build configuration if reusing a project).
 
-## Catalog assets
+## What was actually migrated
 
-`src/data/products.json` contains all 15 products extracted from the approved prototype. Images are standalone files under `public/products/` instead of embedded base64. The product-specific hero colorways were carried over. Prices/stock/descriptions are *prototype placeholders* and require administrative verification before real sales.
+- All HTML body nodes are represented by `React.createElement` trees from `src/data/approved-markup.json`. No screenshot-based recreations, component library substitutions or extra marketing headlines.
+- All original style blocks have been preserved in order in `src/app/globals.css`.
+- The 15 approved catalog records, packaging images, hero behavior, theme switching, cart logic, loader and inspection code are retained *verbatim* in the temporary compatibility files under `public/legacy/`.
+- `LegacyRuntime.tsx` sequentially loads these original scripts after React mounts the approved markup. This is a **transitional React migration**, not yet a complete rewrite of all interaction logic into hooks/state.
+- The full input HTML is included as `reference-approved.html` for screenshot and DOM comparisons; remove it from a final production artifact once sign-off is complete.
 
-## Shipping implementation contract (Phase 3)
+## Why use a compatibility layer?
 
-Use a city-based **rate table managed by the store owner**, with optional postal code and courier-specific overrides:
+The original HTML embeds a huge catalog with media data and tightly coupled DOM event handlers. Reimplementing the carousel and handoff from memory previously changed the approved visuals and introduced regressions. This first milestone therefore prioritizes exact original appearance and behavior. The follow-up migration can safely replace interactions one at a time while comparing each to the reference.
 
-- `City`: city ID, province, canonical city name, normalized name and alias list
-- `ShippingZone` (optional): groups multiple cities into a courier service region
-- `ShippingRate`: city/zone, courier, service tier, fee in integer ZAR cents, active flag, optional weight/price bands, effective dates
-- `ShippingQuote`: captured city, matched rate ID, fee, cart weight/subtotal and expiry
-- `Order`: immutable shipping city, fee snapshot, validated address and payable total
+## Required parity acceptance checks
 
-Shipping calculation must happen **on the server** after city selection, never solely in browser JavaScript. City dropdown values must come from your own managed list; unknown places get “delivery quote required”, **not R0**. At checkout, recalculate the quote after any address/cart change; record the actual rate used with the order. Inventory reservation and shipping snapshots should be part of the checkout transaction.
+1. Desktop 1440×900 and mobile 390×844, 375×812, 320×700: compare reference versus production screenshots.
+2. 15 original catalog products, images and category filters, unchanged.
+3. Multiple repeated single-product swipes from one pointer position on desktop; touch swipes on mobile.
+4. Select a product; enter inspection from above; verify its downward-only handoff and drag/pinch zoom.
+5. Switch all six footer palettes and verify accents throughout the site.
+6. Add-to-cart product image reaches the compact fixed header bag; notification remains unobscured.
+7. Loader exits in normal and offline/failed-script conditions.
+8. Verify browser console and core Web Vitals on actual devices before production release.
 
-**Suggested first launch**: flat fee per city with optional free-shipping threshold. Add courier-specific rates/weight brackets once real courier tariffs are available. Real-time carrier API integration is optional and can be added after launch.
+## Scope and limitations
 
-See `docs/PRODUCTION_PLAN.md` and `prisma/schema.prisma` for the planned database architecture. The Prisma schema is provided as a Phase 2 design artifact, not enabled in Phase 1.
-
-## What is intentionally NOT live yet
-
-- Admin accounts and permissions
-- Database connection and stock validation
-- Delivery quote calculation and checkout
-- Payment processing and PayFast ITN
-- Order confirmation emails
-- Verified product availability
-
-The cart currently exists in browser state only. Checkout is explicitly disabled until Phase 3. No real payment is collected.
+No PostgreSQL, admin dashboard, real payments, customer accounts, or courier-rate checkout is active in Phase 1. Prices and product information remain prototype placeholders until admin/product data is verified. The source/scripts are preserved for design parity and will be migrated into separate React interactive components after visual sign-off. Full Next.js build and physical-device testing must be completed in an environment where npm dependencies and browser testing are available.

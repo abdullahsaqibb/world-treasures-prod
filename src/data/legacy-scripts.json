@@ -1,0 +1,42 @@
+[
+  {
+    "kind": "local",
+    "url": "/legacy/behavior-00.js"
+  },
+  {
+    "kind": "external",
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+  },
+  {
+    "kind": "external",
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+  },
+  {
+    "kind": "local",
+    "url": "/legacy/behavior-03.js"
+  },
+  {
+    "kind": "local",
+    "url": "/legacy/behavior-04.js"
+  },
+  {
+    "kind": "local",
+    "url": "/legacy/behavior-05.js"
+  },
+  {
+    "kind": "local",
+    "url": "/legacy/behavior-06.js"
+  },
+  {
+    "kind": "local",
+    "url": "/legacy/behavior-07.js"
+  },
+  {
+    "kind": "local",
+    "url": "/legacy/behavior-08.js"
+  },
+  {
+    "kind": "local",
+    "url": "/legacy/behavior-09.js"
+  }
+]

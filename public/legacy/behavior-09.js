@@ -1,0 +1,1 @@
+document.getElementById('wtMobileCart')?.addEventListener('click',()=>document.getElementById('openCart')?.click());
