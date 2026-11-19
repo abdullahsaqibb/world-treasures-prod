@@ -96,3 +96,29 @@
 .wt-admin .wt-editorial-hero .wt-eyebrow{color:#8d3f72}
 @media(max-width:1180px){.wt-admin .wt-editorial-hero{grid-template-columns:minmax(0,1.25fr) minmax(220px,.75fr)}.wt-admin .wt-editorial-pack{width:115px;height:155px}.wt-admin .wt-editorial-orbit{width:215px;height:215px}}
 @media(max-width:760px){.wt-admin .wt-editorial-hero{grid-template-columns:1fr;padding:22px}.wt-admin .wt-editorial-hero-art{height:165px;max-width:300px;margin:auto}.wt-admin .wt-editorial-pack{width:91px;height:127px}.wt-admin .wt-editorial-orbit{width:155px;height:155px}.wt-admin .wt-editorial-hero-caption{font-size:8px}.wt-admin .wt-editorial-star{font-size:25px}.wt-admin .wt-editorial-hero-copy h1{font-size:42px!important}}
+
+/* Editorial login is isolated to the admin route and keeps OAuth server-side. */
+.wt-admin .wt-admin-login{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(400px,.95fr);width:100%;min-height:100dvh;background:#faf7ee}
+.wt-admin .wt-login-showcase{background:#e7caf1;padding:36px clamp(25px,4vw,70px);min-height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.wt-admin .wt-login-brand{display:flex;align-items:center;gap:12px;position:relative;z-index:2}
+.wt-admin .wt-login-logo{width:46px;height:46px;display:grid;place-items:center;background:#14243a;color:white;border-radius:7px;font:800 24px "Bricolage Grotesque",sans-serif;letter-spacing:-.15em;transform:rotate(-6deg);box-shadow:5px 5px #ee6941}
+.wt-admin .wt-login-logo span{color:#f18a61}.wt-admin .wt-login-brand strong{display:block;font:800 13px "Bricolage Grotesque",sans-serif;letter-spacing:.09em}.wt-admin .wt-login-brand small{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:#735e7d}
+.wt-admin .wt-login-art{flex:1;min-height:320px;position:relative;display:grid;place-items:center}
+.wt-admin .wt-login-ring{border:1px solid #1b304149;border-radius:50%;width:clamp(225px,30vw,450px);height:clamp(225px,30vw,450px);position:absolute;box-shadow:0 0 0 47px #152a3710,0 0 0 105px #142b380a}
+.wt-admin .wt-login-block{display:grid;place-items:center;width:145px;height:125px;position:absolute;font:900 27px "Bricolage Grotesque",sans-serif;letter-spacing:-.06em;border:3px solid #16293d;box-shadow:15px 15px 0 #1b2a3f1b;transform-origin:center}
+.wt-admin .wt-login-block.block-a{background:#e96b45;color:#fff;left:18%;top:27%;transform:rotate(-17deg)}.wt-admin .wt-login-block.block-b{background:#f9f1dc;color:#19273b;left:43%;top:36%;transform:rotate(12deg);z-index:2}.wt-admin .wt-login-block.block-c{background:#d6efb2;color:#152638;left:30%;top:52%;transform:rotate(-7deg)}
+.wt-admin .wt-login-spark{position:absolute;color:#ec6943;font:50px Georgia,serif;z-index:2}.wt-admin .wt-login-spark.spark-a{left:13%;top:13%}.wt-admin .wt-login-spark.spark-b{right:14%;bottom:12%;color:#16293d}
+.wt-admin .wt-login-showcase-copy{max-width:570px;z-index:2}
+.wt-admin .wt-login-showcase-copy h2{font:900 clamp(40px,5vw,77px)/.86 "Bricolage Grotesque",sans-serif!important;letter-spacing:-.075em!important;margin:14px 0 17px!important}
+.wt-admin .wt-login-showcase-copy p{font-size:13px;line-height:1.7!important;color:#455369;max-width:390px}
+.wt-admin .wt-login-area{padding:31px clamp(25px,5.3vw,85px);display:flex;flex-direction:column;justify-content:space-between;gap:35px}
+.wt-admin .wt-login-top{display:flex;align-items:center;gap:11px;color:#72717b;font-size:10px;font-weight:900;letter-spacing:.14em}
+.wt-admin .wt-login-center{width:100%;max-width:440px;margin:auto}
+.wt-admin .wt-login-tag{font-size:10px;letter-spacing:.15em;font-weight:900;color:#d75c38}
+.wt-admin .wt-login-center h1{font:900 clamp(57px,6vw,90px)/.85 "Bricolage Grotesque",sans-serif!important;letter-spacing:-.08em!important;margin:23px 0!important;text-transform:uppercase!important}
+.wt-admin .wt-login-center h1 span{color:#ed633b}.wt-admin .wt-login-center>p{font-size:14px;line-height:1.8!important;color:#737580;max-width:360px;margin-bottom:30px!important}
+.wt-admin .wt-login-button{width:100%;min-height:58px;border:0;background:#14243a;color:white;border-radius:7px;display:flex;gap:14px;align-items:center;padding:14px 20px;font-weight:800;font-size:13px;cursor:pointer}
+.wt-admin .wt-login-button:hover{background:#2a3f58}.wt-admin .wt-login-button>span{margin-left:auto;font-size:19px}
+.wt-admin .wt-login-hint{padding:17px 0;border-bottom:1px solid #e5dfd5;font-size:12px;line-height:1.6;color:#83838a}.wt-admin .wt-login-back{display:inline-block;margin-top:20px;color:#25394d;text-decoration:underline;font-size:12px;font-weight:800}
+.wt-admin .wt-login-foot{font-size:11px;color:#98949a}
+@media(max-width:900px){.wt-admin .wt-admin-login{grid-template-columns:1fr}.wt-admin .wt-login-showcase{min-height:280px;padding:25px}.wt-admin .wt-login-art{display:none}.wt-admin .wt-login-showcase-copy{margin-top:42px}.wt-admin .wt-login-showcase-copy h2{font-size:46px!important}.wt-admin .wt-login-area{min-height:520px}}
