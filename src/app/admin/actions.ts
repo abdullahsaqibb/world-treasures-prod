@@ -129,3 +129,19 @@ export async function renameCategory(form:FormData){
  await db.category.update({where:{id},data:{name}});
  revalidatePath("/admin/categories");revalidatePath("/admin/products");
 }
+
+export async function saveStorefrontCopy(form:FormData){
+ await requireAdmin();
+ const {copyFields}=await import("@/lib/storefront-copy");
+ const intent=form.get("intent")==="publish"?"publish":"draft";
+ await db.$transaction(async tx=>{
+  for(const field of copyFields){
+   const text=optionalText(form.get(field.key),500);
+   if(!text)throw new Error("Content cannot be empty: "+field.label);
+   const existing=await tx.storeContent.findUnique({where:{key:field.key}});
+   if(existing)await tx.storeContent.update({where:{key:field.key},data:{draftValue:text,...(intent==="publish"?{publishedValue:text}:{})}});
+   else await tx.storeContent.create({data:{key:field.key,draftValue:text,publishedValue:intent==="publish"?text:null}});
+  }
+ });
+ revalidatePath("/admin/storefront");revalidatePath("/");
+}
