@@ -15,7 +15,11 @@ export async function saveProduct(form:FormData){
  const product=await db.product.findUnique({where:{id:productId},include:{variants:{include:{inventory:true},take:1}}});
  if(!product||!product.variants[0])throw new Error("Unknown product");
  const variant=product.variants[0];
+ if(stock<(variant.inventory?.reserved??0))throw new Error("Stock cannot be lower than units reserved for orders");
  await db.$transaction(async tx=>{
+  // Check again within the transaction to avoid silently reducing stock beneath reservations.
+  const current=await tx.inventory.findUnique({where:{variantId:variant.id},select:{reserved:true}});
+  if(current&&stock<current.reserved)throw new Error("Stock cannot be lower than reserved units");
   await tx.product.update({where:{id:productId},data:{name}});
   await tx.productVariant.update({where:{id:variant.id},data:{priceCents}});
   await tx.inventory.upsert({where:{variantId:variant.id},create:{variantId:variant.id,onHand:stock,reserved:0},update:{onHand:stock}});
@@ -103,6 +107,8 @@ export async function updateCatalogProduct(form:FormData){
  if(stock<(variant.inventory?.reserved??0))throw new Error("Stock cannot be lower than quantity already reserved");
  if(!await db.category.findUnique({where:{id:categoryId}}))throw new Error("Choose a valid category");
  await db.$transaction(async tx=>{
+  const current=await tx.inventory.findUnique({where:{variantId:variant.id},select:{reserved:true}});
+  if(current&&stock<current.reserved)throw new Error("Stock cannot be lower than reserved units");
   await tx.product.update({where:{id},data:{name,slug,description,categoryId,status,verified}});
   await tx.productVariant.update({where:{id:variant.id},data:{sku,priceCents,weightGrams}});
   await tx.inventory.upsert({where:{variantId:variant.id},create:{variantId:variant.id,onHand:stock,reserved:0},update:{onHand:stock}});
