@@ -1,0 +1,362 @@
+[
+  {
+    "id": "berry",
+    "name": "Lay’s Wavy Chips · Orange Pack",
+    "flavor": "Savoury",
+    "category": "Chips",
+    "shortDescription": "The orange Lay’s wavy-chip pack from your photograph. Exact translated flavour and label details are awaiting confirmation.",
+    "country": "Origin to confirm",
+    "stock": 12,
+    "badges": [
+      "NEW"
+    ],
+    "color": "#c8b4e7",
+    "dark": "#8f72a9",
+    "shape": "bag",
+    "allergens": "Not verified. Check the original product label before consuming, especially if you have an allergy.",
+    "priceCents": 4990,
+    "image": "/products/berry.webp",
+    "colors": [
+      "#ee681f",
+      "#ffd65a",
+      "#f9ab76",
+      "#62300e"
+    ]
+  },
+  {
+    "id": "crunch",
+    "name": "Lay’s Wavy Chips · Green Pack",
+    "flavor": "Savoury",
+    "category": "Chips",
+    "shortDescription": "The green Lay’s wavy-chip pack from your photograph. Exact translated flavour and label details are awaiting confirmation.",
+    "country": "Origin to confirm",
+    "stock": 8,
+    "badges": [
+      "NEW"
+    ],
+    "color": "#d3e895",
+    "dark": "#8ba34c",
+    "shape": "bag",
+    "allergens": "Not verified. Check the original product label before consuming, especially if you have an allergy.",
+    "priceCents": 4990,
+    "image": "/products/crunch.webp",
+    "colors": [
+      "#5dbd40",
+      "#dbf27c",
+      "#b7e6a9",
+      "#214b2b"
+    ]
+  },
+  {
+    "id": "pop",
+    "name": "Hicey Grape Candy · 75g",
+    "flavor": "Sweet",
+    "category": "Sweets",
+    "shortDescription": "The grape-shaped Hicey product in its purple retail carton, shown in your supplied image. Label size shown: 75g. Ingredients and allergens require verification.",
+    "country": "Origin to confirm",
+    "stock": 6,
+    "badges": [
+      "NEW"
+    ],
+    "color": "#cbb8e7",
+    "dark": "#8e73a8",
+    "shape": "candy",
+    "allergens": "Not verified. Check the original product label before consuming, especially if you have an allergy.",
+    "priceCents": 3990,
+    "image": "/products/pop.webp",
+    "colors": [
+      "#7944a1",
+      "#a7e0ad",
+      "#d5b4ed",
+      "#381b57"
+    ]
+  },
+  {
+    "id": "cocoa",
+    "name": "Starbucks Doubleshot Espresso Latte · 220ml",
+    "flavor": "Drinks",
+    "category": "Drinks",
+    "shortDescription": "The Starbucks Doubleshot Espresso Latte can from your photo. Label size shown: 220ml. Check the original label for ingredients, caffeine and allergen information.",
+    "country": "Origin to confirm",
+    "stock": 9,
+    "badges": [
+      "NEW"
+    ],
+    "color": "#c9dcb0",
+    "dark": "#8e9f73",
+    "shape": "can",
+    "allergens": "Not verified. Check the original product label before consuming, especially if you have an allergy.",
+    "priceCents": 4490,
+    "image": "/products/cocoa.webp",
+    "colors": [
+      "#655b31",
+      "#e5b66d",
+      "#abb48c",
+      "#38331d"
+    ]
+  },
+  {
+    "id": "guava",
+    "name": "Red Bull Cold Brew Coffee",
+    "flavor": "Drinks",
+    "category": "Drinks",
+    "shortDescription": "The brown-and-gold Red Bull cold brew coffee-flavoured energy drink can from your photo. Size, ingredients and caffeine information are awaiting verification.",
+    "country": "Origin to confirm",
+    "stock": 10,
+    "badges": [
+      "NEW"
+    ],
+    "color": "#d8c4e6",
+    "dark": "#9a7dad",
+    "shape": "can",
+    "allergens": "Not verified. Check the original product label before consuming, especially if you have an allergy.",
+    "priceCents": 4990,
+    "image": "/products/guava.webp",
+    "colors": [
+      "#b68c22",
+      "#c95337",
+      "#eac96a",
+      "#562a1e"
+    ]
+  },
+  {
+    "id": "takis",
+    "name": "Takis Fuego",
+    "flavor": "Chips",
+    "category": "Chips",
+    "shortDescription": "Online-sourced prototype example. Availability, price and product information are illustrative.",
+    "country": "Origin to confirm",
+    "stock": 8,
+    "badges": [
+      "ONLINE EXAMPLE"
+    ],
+    "color": "#d0b5e3",
+    "dark": "#8f72a9",
+    "shape": "bag",
+    "allergens": "Not verified. Check the original product label before consuming, especially if you have an allergy.",
+    "priceCents": 5990,
+    "image": "/products/takis.webp",
+    "colors": [
+      "#6735a0",
+      "#efcf44",
+      "#b783dd",
+      "#39166a"
+    ]
+  },
+  {
+    "id": "cookie",
+    "name": "Ben & Jerry’s Cookie Dough",
+    "flavor": "Ice cream",
+    "category": "Ice cream",
+    "shortDescription": "Online-sourced prototype example. Availability, price and product information are illustrative.",
+    "country": "Origin to confirm",
+    "stock": 8,
+    "badges": [
+      "ONLINE EXAMPLE"
+    ],
+    "color": "#c1dce8",
+    "dark": "#8f72a9",
+    "shape": "bag",
+    "allergens": "Not verified. Check the original product label before consuming, especially if you have an allergy.",
+    "priceCents": 12990,
+    "image": "/products/cookie.webp",
+    "colors": [
+      "#75b7df",
+      "#ead29a",
+      "#d0f1f9",
+      "#21476c"
+    ]
+  },
+  {
+    "id": "import-1",
+    "name": "KitKat Mini Chocolate Pouch · 264g",
+    "flavor": "Chocolate",
+    "category": "Chocolate",
+    "shortDescription": "Imported-range example for the prototype. Pack size, origin and availability must be confirmed before launch.",
+    "country": "Origin to confirm",
+    "stock": 7,
+    "badges": [
+      "PROTOTYPE STOCK"
+    ],
+    "color": "#e2c5dd",
+    "dark": "#82669e",
+    "shape": "bag",
+    "allergens": "Check the original packaging for verified allergen information.",
+    "priceCents": 12990,
+    "image": "/products/import-1.webp",
+    "colors": [
+      "#e62b28",
+      "#fff0e4",
+      "#faa98f",
+      "#811d22"
+    ]
+  },
+  {
+    "id": "import-2",
+    "name": "Cadbury Dairy Milk Daim · 120g",
+    "flavor": "Chocolate",
+    "category": "Chocolate",
+    "shortDescription": "Imported-range example for the prototype. Pack size, origin and availability must be confirmed before launch.",
+    "country": "Origin to confirm",
+    "stock": 12,
+    "badges": [
+      "PROTOTYPE STOCK"
+    ],
+    "color": "#cdbce8",
+    "dark": "#82669e",
+    "shape": "bag",
+    "allergens": "Check the original packaging for verified allergen information.",
+    "priceCents": 6990,
+    "image": "/products/import-2.webp",
+    "colors": [
+      "#63338b",
+      "#dc6766",
+      "#c9a3e8",
+      "#3c225e"
+    ]
+  },
+  {
+    "id": "import-3",
+    "name": "Mini Oreo Original · 61g",
+    "flavor": "Biscuits",
+    "category": "Biscuits",
+    "shortDescription": "Imported-range example for the prototype. Pack size, origin and availability must be confirmed before launch.",
+    "country": "Origin to confirm",
+    "stock": 12,
+    "badges": [
+      "PROTOTYPE STOCK"
+    ],
+    "color": "#c1cce9",
+    "dark": "#82669e",
+    "shape": "bag",
+    "allergens": "Check the original packaging for verified allergen information.",
+    "priceCents": 2490,
+    "image": "/products/import-3.webp",
+    "colors": [
+      "#295eac",
+      "#f1d942",
+      "#a7d0f4",
+      "#173e79"
+    ]
+  },
+  {
+    "id": "import-4",
+    "name": "Fanta Fruit Twist · 330ml",
+    "flavor": "Drinks",
+    "category": "Drinks",
+    "shortDescription": "Imported-range example for the prototype. Pack size, origin and availability must be confirmed before launch.",
+    "country": "Origin to confirm",
+    "stock": 7,
+    "badges": [
+      "PROTOTYPE STOCK"
+    ],
+    "color": "#e8c7ae",
+    "dark": "#82669e",
+    "shape": "can",
+    "allergens": "Check the original packaging for verified allergen information.",
+    "priceCents": 3490,
+    "image": "/products/import-4.webp",
+    "colors": [
+      "#ed554b",
+      "#243d88",
+      "#ffc0aa",
+      "#7d202f"
+    ]
+  },
+  {
+    "id": "import-5",
+    "name": "Fanta Pineapple · 355ml",
+    "flavor": "Drinks",
+    "category": "Drinks",
+    "shortDescription": "Imported-range example for the prototype. Pack size, origin and availability must be confirmed before launch.",
+    "country": "Origin to confirm",
+    "stock": 12,
+    "badges": [
+      "PROTOTYPE STOCK"
+    ],
+    "color": "#e2c5dd",
+    "dark": "#82669e",
+    "shape": "can",
+    "allergens": "Check the original packaging for verified allergen information.",
+    "priceCents": 3990,
+    "image": "/products/import-5.webp",
+    "colors": [
+      "#edcf37",
+      "#2b6db5",
+      "#ffe9a0",
+      "#665310"
+    ]
+  },
+  {
+    "id": "import-6",
+    "name": "Dr Pepper Strawberries & Cream",
+    "flavor": "Drinks",
+    "category": "Drinks",
+    "shortDescription": "Imported-range example for the prototype. Pack size, origin and availability must be confirmed before launch.",
+    "country": "Origin to confirm",
+    "stock": 12,
+    "badges": [
+      "PROTOTYPE STOCK"
+    ],
+    "color": "#cdbce8",
+    "dark": "#82669e",
+    "shape": "can",
+    "allergens": "Check the original packaging for verified allergen information.",
+    "priceCents": 4990,
+    "image": "/products/import-6.webp",
+    "colors": [
+      "#a63e65",
+      "#f2a0ba",
+      "#f2c5d0",
+      "#641a42"
+    ]
+  },
+  {
+    "id": "import-7",
+    "name": "Sour Patch Kids Extreme · 99g",
+    "flavor": "Sweets",
+    "category": "Sweets",
+    "shortDescription": "Imported-range example for the prototype. Pack size, origin and availability must be confirmed before launch.",
+    "country": "Origin to confirm",
+    "stock": 7,
+    "badges": [
+      "PROTOTYPE STOCK"
+    ],
+    "color": "#c1cce9",
+    "dark": "#82669e",
+    "shape": "bag",
+    "allergens": "Check the original packaging for verified allergen information.",
+    "priceCents": 4490,
+    "image": "/products/import-7.webp",
+    "colors": [
+      "#edce32",
+      "#f25c2b",
+      "#fbeab0",
+      "#74420e"
+    ]
+  },
+  {
+    "id": "import-8",
+    "name": "Lotus Biscoff Smooth Spread · 400g",
+    "flavor": "Pantry",
+    "category": "Pantry",
+    "shortDescription": "Imported-range example for the prototype. Pack size, origin and availability must be confirmed before launch.",
+    "country": "Origin to confirm",
+    "stock": 12,
+    "badges": [
+      "PROTOTYPE STOCK"
+    ],
+    "color": "#e8c7ae",
+    "dark": "#82669e",
+    "shape": "bag",
+    "allergens": "Check the original packaging for verified allergen information.",
+    "priceCents": 9990,
+    "image": "/products/import-8.webp",
+    "colors": [
+      "#c84428",
+      "#bc8b48",
+      "#edcfaa",
+      "#712c20"
+    ]
+  }
+]
