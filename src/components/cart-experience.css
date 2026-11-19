@@ -19,3 +19,40 @@
 .wt-cart-basket-animate .wt-basket-packets img{animation:wt-packet-drop .68s cubic-bezier(.24,.78,.25,1.14) backwards;animation-delay:calc(var(--packet-index,0)*95ms);will-change:transform,opacity}
 @keyframes wt-packet-drop{from{opacity:0;translate:0 -75px;scale:.72}55%{opacity:1}to{opacity:1;translate:0 0;scale:1}}
 @media(prefers-reduced-motion:reduce){.wt-cart-basket-animate .wt-basket-packets img{animation:none!important}.wt-cart-bag-basket{transition:none}}
+
+/* The full-page bag uses the same two-column layout as the approved checkout. */
+#cartDialog.drawer{width:100vw;max-width:none;height:100dvh;max-height:100dvh;margin:0;border:0;border-radius:0;background:#f6f3ec;padding:48px clamp(18px,6vw,100px);overflow-y:auto}
+#cartDialog.drawer>.eyebrow,#cartDialog.drawer>h2,#cartContents{max-width:1150px;margin-left:auto;margin-right:auto}
+#cartDialog.drawer>h2{margin-top:12px;margin-bottom:36px;font-size:clamp(42px,5vw,58px)}
+#cartDialog.drawer>.close{position:fixed;z-index:3;right:18px;top:14px}
+#cartDialog .wt-cart-page .cart-page-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(290px,1fr);align-items:start;gap:clamp(28px,5.5vw,70px)}
+#cartDialog .wt-cart-panel{padding-top:0}
+#cartDialog .wt-bag-items{min-width:0}
+#cartDialog .wt-cart-line{display:grid;grid-template-columns:90px minmax(0,1fr) auto;column-gap:20px;row-gap:8px;min-height:126px;padding:22px 0;border-bottom:1px solid #d8dcdf}
+#cartDialog .wt-cart-line>img{width:74px;height:94px;border-radius:5px;object-fit:contain;background:transparent}
+#cartDialog .wt-cart-desc{gap:8px;align-self:center}
+#cartDialog .wt-cart-desc strong{font-size:16px;font-weight:750;color:#11213b}
+#cartDialog .wt-cart-desc span{font-size:13px;color:#142238}
+#cartDialog .wt-cart-qty{grid-column:2;grid-row:2;justify-self:start;align-self:start}
+#cartDialog .wt-line-price{grid-column:3;grid-row:1;align-self:center;text-align:right}
+#cartDialog .wt-bag-order-summary{position:static;min-width:0;margin-top:0;border-radius:15px;padding:27px;background:#e6e9f0;border:1px solid #d1d7e1;color:#13233c}
+#cartDialog .wt-bag-order-summary h3{font-size:12px;line-height:1.5;font-weight:850;letter-spacing:.08em;margin-bottom:23px}
+#cartDialog .wt-bag-summary-row{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-bottom:18px}
+#cartDialog .wt-bag-delivery-note{margin:16px 0!important;padding:13px 15px;background:#e8efdd;color:#142b20;border-radius:3px;font-size:12px!important}
+#cartDialog .wt-bag-payfast{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:24px}
+#cartDialog .wt-bag-payfast strong{font-size:23px;font-weight:850;letter-spacing:-.05em}
+#cartDialog .wt-bag-payfast small{font-size:11px}
+#cartDialog .wt-cart-primary{border-radius:28px;background:#10203a;color:#fff;padding:15px}
+#cartDialog .wt-bag-order-summary .wt-cart-disclaimer{margin:12px 0 18px!important}
+#cartDialog .wt-cart-bag-bottom{margin:22px 0 0;padding:17px 12px 12px;border:1px solid #ccd6dc;background:#f5f3eb;border-radius:14px}
+#cartDialog .wt-cart-bag-label{margin-bottom:6px!important}
+#cartDialog .wt-cart-bag-basket{box-shadow:none;border:0;background:transparent;padding:5px;transform:none;gap:2px}
+#cartDialog .wt-cart-bag-basket:hover{transform:translateY(-2px)}
+#cartDialog .wt-cart-bag-basket .wt-basket-visual{height:158px;margin:0 auto 4px;max-width:290px}
+#cartDialog .wt-cart-bag-basket .wt-basket-packets img{width:74px;height:105px}
+#cartDialog .wt-cart-bag-basket .wt-basket-box{width:196px;height:86px}
+#cartDialog .wt-cart-bag-basket .wt-basket-box>span{font-size:12px}
+#cartDialog .wt-cart-bag-basket>strong{font-size:14px}
+#cartDialog .wt-cart-bag-basket>span:last-child{font-size:12px}
+#cartDialog .wt-bag-back-shopping{margin-top:18px;padding:6px 0;background:transparent;border-bottom:1px solid #12223a;color:#12223a;font-weight:800;cursor:pointer}
+@media(max-width:800px){#cartDialog.drawer{padding:32px 18px}#cartDialog .wt-cart-page .cart-page-layout{grid-template-columns:1fr;gap:28px}#cartDialog .wt-bag-order-summary{width:100%}#cartDialog .wt-cart-line{grid-template-columns:70px minmax(0,1fr) auto;gap:12px}#cartDialog .wt-cart-line>img{width:62px;height:78px}#cartDialog .wt-cart-desc strong{font-size:14px}#cartDialog.drawer>h2{margin-bottom:20px}}
