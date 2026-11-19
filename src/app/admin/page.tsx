@@ -1,7 +1,9 @@
+import { ensureAdminPage } from "@/lib/admin-access";
 import { db } from "@/lib/db";
 import Link from "next/link";
 export const dynamic="force-dynamic";
 export default async function AdminDashboard(){
+ await ensureAdminPage();
  const [products,cities,orders]=await Promise.all([db.product.count(),db.city.count(),db.order.count()]);
  return <section><h1>Admin overview</h1><p>Catalog values are provisional until your verified price document is imported.</p>
  <div style={{display:"flex",flexWrap:"wrap",gap:14}}>
