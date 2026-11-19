@@ -1,5 +1,6 @@
 import { ApprovedRegions } from "@/components/ApprovedRegions";
 import { LegacyRuntime } from "@/components/LegacyRuntime";
+import { CartExperience } from "@/components/CartExperience";
 import { db } from "@/lib/db";
 import type { StoreCopyKey } from "@/lib/storefront-copy";
 export const dynamic="force-dynamic";
@@ -13,5 +14,5 @@ export default async function Home() {
  }catch{
   // On a branch whose database has not been migrated yet, render the approved content unchanged.
  }
- return <><ApprovedRegions overrides={overrides}/><LegacyRuntime /></>;
+ return <><ApprovedRegions overrides={overrides}/><LegacyRuntime /><CartExperience /></>;
 }
