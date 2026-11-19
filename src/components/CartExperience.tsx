@@ -81,7 +81,7 @@ export function CartExperience(){
   a.onfinish=()=>ghost.remove();setTimeout(()=>ghost.remove(),900);
  }
  function add(p:Product,src?:HTMLElement|null){change(p.id,1);fly(src||null,p);setNotice(p.name+" added to bag");}
- function startCheckout(){setBagOpen(false);setStep("bag");setCheckoutOpen(true);}
+ function startCheckout(){setBagOpen(false);setStep("bag");setExpanded(false);setCheckoutOpen(true);}
  const itemList=(editable:boolean)=><div className="wt-cart-list">{items.map(({product:p,qty})=><div className="wt-cart-line" key={p.id}>
   <img src={p.image} alt="" /><div className="wt-cart-desc"><strong>{p.name}</strong><span>{zar(p.priceCents)} each</span></div>
   {editable?<div className="wt-cart-qty"><button aria-label={"Remove one "+p.name} onClick={()=>change(p.id,-1)}>−</button><b>{qty}</b><button aria-label={"Add one "+p.name} onClick={()=>change(p.id,1)}>+</button></div>:<b>× {qty}</b>}
@@ -97,7 +97,7 @@ export function CartExperience(){
  <h2>Review your order</h2>
  <p className="wt-cart-help">Everything you've selected, packed together. Click the basket to expand your item list.</p>
  <button className="wt-cart-basket-toggle" onClick={()=>setExpanded(v=>!v)} aria-expanded={expanded}>{basket}<strong>{count} items in your World Treasures basket</strong><span>{expanded?"Hide items −":"View everything inside +"}</span></button>
- {expanded&&itemList(false)}
+ {expanded&&<div className="wt-cart-popup-shade" onClick={()=>setExpanded(false)} role="presentation"><section className="wt-cart-popup" role="dialog" aria-modal="true" aria-label="Products inside your basket" onClick={e=>e.stopPropagation()}><div className="wt-cart-popup-head"><div><strong>Your basket contents</strong><span>{count} products selected</span></div><button type="button" aria-label="Close basket details" onClick={()=>setExpanded(false)}>×</button></div>{itemList(false)}<div className="wt-cart-total"><span>Products subtotal</span><strong>{zar(total)}</strong></div><button className="wt-cart-primary" onClick={()=>setExpanded(false)}>Back to checkout</button></section></div>}
  <div className="wt-cart-total"><span>Products subtotal</span><strong>{zar(total)}</strong></div>
  {step==="bag"&&<><button className="wt-cart-primary" onClick={()=>setStep("delivery")} disabled={!count}>Continue to delivery →</button><button className="wt-cart-secondary" onClick={()=>{setCheckoutOpen(false);setBagOpen(true)}}>← Edit your bag</button></>}
  {step==="delivery"&&<div className="wt-cart-step"><h3>Delivery details</h3><p>The delivery address and shipping-quote integration are not connected to payment yet. You can still review your selections here.</p><label>Delivery city <input placeholder="Your city in South Africa" disabled/></label><button className="wt-cart-primary" onClick={()=>setStep("payment")}>Continue to payment preview →</button><button className="wt-cart-secondary" onClick={()=>setStep("bag")}>← Back to bag</button></div>}
