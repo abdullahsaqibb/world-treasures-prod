@@ -1,0 +1,4 @@
+import {ensureAdminPage} from "@/lib/admin-access";
+import {AdminFeaturePage} from "../AdminFeaturePage";
+export const dynamic="force-dynamic";
+export default async function Page(){await ensureAdminPage();return <AdminFeaturePage eyebrow="brand / creative assets" title="Media library" description="A central collection for product photography, banners and campaign media." icon="image" items={[{"title":"Upload & organize","detail":"Drag-and-drop upload, folders, reusable image selection"},{"title":"Asset details","detail":"Alternative text, file type, dimensions and image ownership"},{"title":"Image optimization","detail":"Responsive formats, preview, crop and compression"},{"title":"Media permissions","detail":"Restrict destructive actions to authorized staff"}]} note="We'll use private signed uploads and storage rules; no files will be accepted before those safeguards are live."/>;}
