@@ -38,7 +38,7 @@ function render(node: SourceNode, key: number | string, overrides: Partial<Recor
     props[aliases[name] || name] = value;
   }
   if (voidTags.has(node.tag)) return createElement(node.tag, props);
-  const directText=node.children.filter((c):c is string=>typeof c==="string").join(" ").replace(/\\s+/g," ").trim();
+  const directText=node.children.filter((c):c is string=>typeof c==="string").join(" ").replace(/\s+/g," ").trim();
   const editable=copyFields.find(field=>field.original===directText);
   if(editable && overrides[editable.key]!==undefined) return createElement(node.tag,props,overrides[editable.key]);
   return createElement(node.tag, props, ...node.children.map((child, index) => render(child, index, overrides)));
