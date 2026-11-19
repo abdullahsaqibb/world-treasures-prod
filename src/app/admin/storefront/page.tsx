@@ -1,20 +1,34 @@
 import { ensureAdminPage } from "@/lib/admin-access";
+import { db } from "@/lib/db";
+import { copyFields } from "@/lib/storefront-copy";
+import { saveStorefrontCopy } from "../actions";
 import Link from "next/link";
 export const dynamic="force-dynamic";
-const areas=[
- {title:"Homepage hero & carousel",details:"Slide order, headlines, descriptions, call-to-action buttons, promotional banners and mobile hero images.",phase:"Planned"},
- {title:"Homepage sections",details:"Featured products, category blocks, bestselling items, section titles, display order, visibility and campaign sections.",phase:"Planned"},
- {title:"Brand & appearance",details:"Store logo, typography, colour palette, button styles, spacing, backgrounds and responsive presentation.",phase:"Planned"},
- {title:"Store navigation",details:"Main menu, footer links, categories, announcements, policy links and contact details.",phase:"Planned"},
- {title:"Pages & content",details:"About, shipping, returns, privacy, terms, contact information and search/SEO metadata.",phase:"Planned"},
- {title:"Media library",details:"Upload, organize, crop, replace and remove photos and banner images without writing image URLs.",phase:"Planned"}
+const future=[
+ {title:"Homepage section builder",details:"Reorder, show/hide and configure featured products, campaign blocks and hero slides."},
+ {title:"Brand styling & theme",details:"Edit approved colours, fonts, spacing and mobile-specific design tokens."},
+ {title:"Image and video library",details:"Drag-and-drop media uploads, organization and image replacement."},
+ {title:"Pages, navigation & SEO",details:"Manage menu items, footer, policy pages, metadata and site settings."},
+ {title:"Preview & revision history",details:"Compare changes, preview mobile layouts, schedule publishing and restore previous versions."}
 ];
 export default async function StorefrontAdmin(){
  await ensureAdminPage();
- return <div><span className="wt-eyebrow">Store experience</span><div className="wt-head"><div><h1>Storefront & content</h1><p className="wt-lede">This is where your client will eventually manage how the public website looks and reads, without touching code.</p></div><Link href="/" target="_blank" className="wt-btn light">Preview current store ↗</Link></div>
- <div className="wt-help"><strong>Important:</strong> The public storefront is currently built from the approved React prototype, not a live page builder. These visual editing modules are planned, not functional controls. We'll add authenticated content storage, previews, and a Publish action before enabling them.</div>
- <section className="wt-card"><div className="wt-cardhead"><h2>Editing areas</h2><span className="wt-badge">Roadmap</span></div><div className="wt-shortcuts">{areas.map(x=><div className="wt-shortcut" key={x.title}><span className="wt-badge amber">{x.phase}</span><b>{x.title}</b><span>{x.details}</span></div>)}</div></section>
- <div className="wt-2col"><div className="wt-card"><h2>How editing will work</h2><div className="wt-stack" style={{marginTop:15}}><p><strong>1. Choose an area</strong><br/><span className="wt-muted">Select the homepage, a page, a section, or a visual asset.</span></p><p><strong>2. Edit safely</strong><br/><span className="wt-muted">Make changes in the editor, preserving the current live version.</span></p><p><strong>3. Preview desktop and mobile</strong><br/><span className="wt-muted">Review how customers will see your changes.</span></p><p><strong>4. Publish or roll back</strong><br/><span className="wt-muted">Promote a reviewed version to the live website, with a revision history.</span></p></div></div>
- <div className="wt-card"><h2>What you can manage today</h2><p className="wt-lede">The product database and delivery fees are ready to edit in this development admin.</p><div className="wt-stack"><Link className="wt-btn" href="/admin/products">Manage products →</Link><Link className="wt-btn light" href="/admin/delivery">Manage delivery rates →</Link></div></div></div>
+ const rows=await db.storeContent.findMany();
+ const byKey=new Map(rows.map(x=>[x.key,x]));
+ const published=copyFields.filter(x=>byKey.get(x.key)?.publishedValue!==null&&byKey.has(x.key)).length;
+ return <div><span className="wt-eyebrow">Store experience / Content management</span><div className="wt-head"><div><h1>Storefront editor</h1><p className="wt-lede">Edit the words customers see on the website. Save your work as a draft, then publish to the development storefront when reviewed.</p></div><Link href="/" target="_blank" className="wt-btn light">Open development storefront ↗</Link></div>
+ <div className="wt-grid"><div className="wt-stat"><small>Editable copy fields</small><b>{copyFields.length}</b><span>In this first content release</span></div><div className="wt-stat"><small>Published overrides</small><b>{published}</b><span>Fields using edited text</span></div></div>
+ <div className="wt-help"><strong>Safe publishing:</strong> Saving a draft only changes admin data. Publishing updates the development preview's public-facing copy. The live production website is not affected because this branch has not been merged.</div>
+ <form action={saveStorefrontCopy} className="wt-card"><div className="wt-cardhead"><h2>Homepage copy</h2><span className="wt-badge green">Editable now</span></div>
+ <p className="wt-lede">Each field is labeled by where it appears. Leave the original text if you don't want to change it.</p>
+ <div className="wt-formgrid">{copyFields.map(field=>{
+ const record=byKey.get(field.key);
+ return <label className={"wt-field "+(field.key.endsWith("intro")?"full":"")} key={field.key}>{field.label}<small>{field.hint}</small>
+ {field.key.endsWith("intro")?<textarea name={field.key} maxLength={500} defaultValue={record?.draftValue??field.original} required/>:<input name={field.key} maxLength={500} defaultValue={record?.draftValue??field.original} required/>}
+ {record?.publishedValue!==null&&record?.publishedValue!==undefined?<small>Current published text: {record.publishedValue}</small>:<small>Using original storefront text</small>}
+ </label>})}</div>
+ <div className="wt-actions" style={{marginTop:22}}><button className="wt-btn light" name="intent" value="draft">Save draft changes</button><button className="wt-btn orange" name="intent" value="publish">Publish copy to preview</button></div>
+ </form>
+ <section className="wt-card"><div className="wt-cardhead"><h2>Next visual editing tools</h2><span className="wt-badge amber">Planned — not active</span></div><p className="wt-lede">The copy editor above works now. The following modules require additional storage, preview and design controls before we expose them to store operators.</p><div className="wt-shortcuts">{future.map(x=><div key={x.title} className="wt-shortcut"><span className="wt-badge amber">Coming next</span><b>{x.title}</b><span>{x.details}</span></div>)}</div></section>
  </div>;
 }
