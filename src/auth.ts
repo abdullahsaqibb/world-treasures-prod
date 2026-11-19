@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 const allowed = () => new Set((process.env.ADMIN_GITHUB_IDS ?? "").split(",").map(s=>s.trim()).filter(Boolean));
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [GitHub],
+  providers: [GitHub({ issuer: "https://github.com/login/oauth" })],
   session: { strategy: "jwt" },
   callbacks: {
     async signIn({ account, profile }) { return account?.provider === "github" && !!profile && allowed().has(String(profile.id)); },
