@@ -105,6 +105,6 @@ export function CartExperience(){
  </div>;
  if(!mounted)return null;
  return <>{targets.grid&&createPortal(productsGrid,targets.grid)}{targets.contents&&createPortal(bagContents,targets.contents)}{targets.checkout&&createPortal(checkoutContents,targets.checkout)}
- <div className="wt-cart-float" ref={flyRef}><button type="button" className="wt-cart-float-button" onClick={()=>setBagOpen(true)} aria-label={"Open animated basket with "+count+" items"}><span className="wt-cart-mini-packets">{items.slice(0,3).map(({product:p},i)=><img key={p.id} src={p.image} alt="" style={{transform:`rotate(${(i-1)*22}deg)`}}/>)}</span><span className="wt-cart-float-base">🛍</span><span className="wt-cart-float-count">{count}</span></button><small>YOUR BASKET</small></div>
+ <div className="wt-cart-float" ref={flyRef}><button type="button" className="wt-cart-float-button" onClick={()=>setBagOpen(true)} aria-label={"Open animated basket with "+count+" items"}><span className="wt-cart-mini-packets">{items.slice(0,3).map(({product:p},i)=><img key={p.id} src={p.image} alt="" style={{transform:`rotate(${(i-1)*22}deg)`}}/>)}</span><span className="wt-cart-float-base"><span className="wt-cart-bag-handle"/><span className="wt-cart-bag-word">WT</span></span><span className="wt-cart-float-count">{count}</span></button><small>YOUR BASKET</small></div>
  <div className="wt-cart-live" role="status" aria-live="polite">{notice}</div></>;
 }
