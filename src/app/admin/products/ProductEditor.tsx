@@ -1,12 +1,17 @@
 "use client";
 import Link from "next/link";
-import {useState} from "react";
-import {createCatalogProduct,updateCatalogProduct} from "../actions";
+import {useActionState,useEffect,useState} from "react";
+import {useRouter} from "next/navigation";
+import {createCatalogProductState,updateCatalogProductState,type CatalogFormState} from "../actions";
 import {PendingSubmit} from "../PendingSubmit";
 type CategoryOption={id:string;name:string};
 type ProductData={id:string;name:string;slug:string;description:string|null;verified:boolean;status:"DRAFT"|"ACTIVE"|"ARCHIVED";categoryId:string;image:string;sku:string;priceCents:number;stock:number;reserved:number;weightGrams:number|null};
 export default function ProductEditor({categories,product}:{categories:CategoryOption[],product?:ProductData}){
  const editing=Boolean(product);
+ const router=useRouter();
+ const initialState:CatalogFormState={ok:false,message:""};
+ const [result,submitAction]=useActionState(editing?updateCatalogProductState:createCatalogProductState,initialState);
+ useEffect(()=>{if(result.ok&&result.productId)router.replace("/admin/products/"+encodeURIComponent(result.productId));},[result,router]);
  const [name,setName]=useState(product?.name??"");
  const [image,setImage]=useState(product?.image??"");
  const [imageFailed,setImageFailed]=useState(false);
@@ -17,7 +22,7 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
  const imageAllowed=image.startsWith("/")&&!image.startsWith("//")||/^https:\/\/[^\s]+$/i.test(image);
  return <div>
  <div className="wt-head"><div><span className="wt-eyebrow">MERCHANDISE / {editing?"EDIT PRODUCT":"NEW PRODUCT"}</span><h1>{editing?"Refine the listing.":"Add something good."}</h1><p className="wt-lede">Everything your customers need to know, all in one guided form. No coding required.</p><div className="wt-product-topline"><span className="wt-badge amber">Draft catalog</span>{product?.verified?<span className="wt-badge green">Information verified</span>:<span className="wt-badge">Pending review</span>}</div></div><Link className="wt-btn light" href="/admin/products">← Back to products</Link></div>
- <form action={editing?updateCatalogProduct:createCatalogProduct} className="wt-stack">
+ <form action={submitAction} className="wt-stack">
  {product&&<input type="hidden" name="productId" value={product.id}/>}
  <div className="wt-product-editor-grid">
  <div className="wt-product-editor-main">
@@ -63,6 +68,7 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
   </ul></section>
  </aside>
  </div>
+ {result.message&&<div role={result.ok?"status":"alert"} aria-live="polite" className={"wt-help "+(result.ok?"wt-form-success":"wt-form-error")}>{result.message}</div>}
  <div className="wt-editor-savebar"><small>Changes are saved to the <strong>development</strong> catalog.</small><div className="wt-actions"><Link className="wt-btn light" href="/admin/products">Cancel</Link><PendingSubmit pendingText={editing?"Saving product…":"Creating draft…"}>{editing?"Save product changes":"Save as draft →"}</PendingSubmit></div></div>
  </form></div>;
 
