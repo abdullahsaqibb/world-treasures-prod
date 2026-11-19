@@ -57,10 +57,10 @@ function imagePath(value:string){
 export async function createCatalogProduct(form:FormData){
  await requireAdmin();
  const name=clean(form.get("name"),150);
- const slug=slugify(clean(form.get("slug"),150));
+ const slug=slugify(optionalText(form.get("slug"),150)||name);
  if(!slug)throw new Error("Please provide a valid product URL slug");
  const categoryId=clean(form.get("categoryId"),128);
- const sku=clean(form.get("sku"),100).toUpperCase();
+ const sku=(optionalText(form.get("sku"),100)||"WT-"+slug).toUpperCase();
  if(!/^[A-Z0-9][A-Z0-9._-]*$/.test(sku))throw new Error("SKU may contain letters, numbers, dots, dashes and underscores");
  const priceCents=money(form.get("priceZar"));
  const stock=qty(form.get("stock"));
