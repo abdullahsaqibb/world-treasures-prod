@@ -8,3 +8,14 @@
 /* The approved grid wrapper now hosts one complete React product-grid portal. */
 #productGrid:has(>.wt-cart-shop-grid){display:block!important;width:100%}
 #productGrid>.wt-cart-shop-grid{width:100%;grid-column:1/-1}
+
+/* In-bag basket: below totals, never a floating homepage control. */
+.wt-cart-float,.wt-cart-float-button{display:none!important}
+.wt-cart-bag-bottom{margin:22px 0 12px;padding:18px 14px 14px;background:#fff9f0;border:1px solid #e8d9c7;border-radius:18px}
+.wt-cart-bag-label{text-align:center;font-weight:900;font-size:10px!important;letter-spacing:.16em;color:#9f6145;margin:0 0 10px!important}
+.wt-cart-bag-basket{background:#fffdf9;border:1px solid #efdfcc;transition:box-shadow .2s,transform .2s}
+.wt-cart-bag-basket:hover,.wt-cart-bag-basket:focus-visible{box-shadow:0 9px 22px #4b2b0e1c;transform:translateY(-2px)}
+.wt-cart-bag-basket .wt-basket-visual{pointer-events:none}
+.wt-cart-basket-animate .wt-basket-packets img{animation:wt-packet-drop .68s cubic-bezier(.24,.78,.25,1.14) backwards;animation-delay:calc(var(--packet-index,0)*95ms);will-change:transform,opacity}
+@keyframes wt-packet-drop{from{opacity:0;translate:0 -75px;scale:.72}55%{opacity:1}to{opacity:1;translate:0 0;scale:1}}
+@media(prefers-reduced-motion:reduce){.wt-cart-basket-animate .wt-basket-packets img{animation:none!important}.wt-cart-bag-basket{transition:none}}
