@@ -1,7 +1,7 @@
 // Phase 2 database model DESIGN — install Prisma and migrate only after Phase 1 approval.
 // Prisma 7 connection URLs are configured in prisma.config.ts, not here.
-generator client { provider = "prisma-client" output = "../src/generated/prisma" }
-datasource db { provider = "postgresql" }
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") directUrl = env("DIRECT_URL") }
 
 enum Role { OWNER MANAGER FULFILLMENT CUSTOMER }
 enum ProductStatus { DRAFT ACTIVE ARCHIVED }
@@ -43,6 +43,7 @@ model Product {
  categoryId String
  category Category @relation(fields:[categoryId],references:[id])
  status ProductStatus @default(DRAFT)
+ verified Boolean @default(false)
  images ProductImage[]
  variants ProductVariant[]
  createdAt DateTime @default(now())
