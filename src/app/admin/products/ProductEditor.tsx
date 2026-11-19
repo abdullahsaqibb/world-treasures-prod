@@ -63,3 +63,5 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
  </div>
  <div className="wt-editor-savebar"><small>Changes are saved to the <strong>development</strong> catalog.</small><div className="wt-actions"><Link className="wt-btn light" href="/admin/products">Cancel</Link><button className="wt-btn orange" type="submit">{editing?"Save product changes":"Save as draft →"}</button></div></div>
  </form></div>;
+
+}
