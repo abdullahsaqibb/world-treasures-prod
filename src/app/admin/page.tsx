@@ -9,7 +9,7 @@ export default async function AdminDashboard(){
  const [products,drafts,unverified,lowStock,cities,orders,customers,recent,latestOrders] = await Promise.all([
  db.product.count(),db.product.count({where:{status:"DRAFT"}}),db.product.count({where:{verified:false}}),
  db.inventory.count({where:{onHand:{lte:5}}}),db.city.count({where:{active:true,rates:{some:{active:true}}}}),
- db.order.count(),db.user.count(),db.product.findMany({take:5,orderBy:{updatedAt:"desc"},include:{category:true,variants:{take:1,include:{inventory:true}}}}),
+ db.order.count(),db.user.count(),db.product.findMany({take:5,orderBy:{updatedAt:"desc"},include:{category:true,images:{take:1},variants:{take:1,include:{inventory:true}}}}),
  db.order.findMany({take:4,orderBy:{createdAt:"desc"},select:{id:true,orderNumber:true,status:true,totalCents:true,createdAt:true}})
  ]);
  const metrics=[
@@ -25,7 +25,7 @@ export default async function AdminDashboard(){
  {title:"Edit storefront copy",detail:"Draft text and preview publishing",icon:"monitor",href:"/admin/storefront"}
  ];
  return <div>
- <section className="wt-hero-panel"><div><span className="wt-eyebrow">MERCHANT OVERVIEW</span><h1>Your store. One clear workspace.</h1><p>Manage World Treasures without technical tools. Start with product verification, stock and delivery setup while we prepare the launch systems.</p></div><Link href="/admin/products/new" className="wt-btn">＋ Add a product</Link></section>
+ <div className="wt-dashboard-masthead"><span className="wt-dashboard-dot"/> WORLD TREASURES / MERCHANT STUDIO <span style={{marginLeft:"auto"}}>DEVELOPMENT MODE</span></div><section className="wt-hero-panel wt-editorial-hero"><div className="wt-editorial-hero-copy"><span className="wt-eyebrow">YOUR STORE, YOUR SPACE</span><h1>GOOD THINGS<br/>ARE IN STORE<span className="wt-editorial-period">.</span></h1><p>Everything behind World Treasures, beautifully organized. Manage products, stock, delivery and what comes next from one place.</p><Link href="/admin/products/new" className="wt-btn">＋ Add a product</Link></div><div className="wt-editorial-hero-art" aria-hidden="true"><div className="wt-editorial-orbit"/><span className="wt-editorial-star star-one">✳</span><span className="wt-editorial-star star-two">✳</span>{recent.slice(0,3).map((p,i)=><div className={"wt-editorial-pack pack-"+i} key={p.id}>{p.images[0]?.url?<img src={p.images[0].url} alt=""/>:<span>WT</span>}</div>)}<span className="wt-editorial-hero-caption">THE GOOD STUFF<br/>STARTS HERE ↗</span></div></section>
  <div className="wt-kpi-strip">{metrics.map(m=><div className="wt-kpi" key={m.label}><span className="wt-kpi-icon"><AdminIcon name={m.icon} size={19}/></span><div className="wt-kpi-label">{m.label}</div><div className="wt-kpi-num">{m.value}</div><div className="wt-kpi-note">{m.detail}</div></div>)}</div>
  <div className="wt-dashboard-columns"><div>
  <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">GET THINGS DONE</span><h2>Quick actions</h2></div><span className="wt-badge">Operations</span></div><div className="wt-action-list">{actions.map(a=><Link href={a.href} key={a.href}><span className="wt-action-icon"><AdminIcon name={a.icon} size={19}/></span><div><strong>{a.title}</strong><small>{a.detail}</small></div><span className="wt-action-arrow">→</span></Link>)}</div></section>
