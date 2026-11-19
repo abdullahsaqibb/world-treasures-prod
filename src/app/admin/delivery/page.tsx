@@ -18,3 +18,5 @@ export default async function DeliveryPage(){
  <form action={saveDeliveryCity} className="wt-stack"><label className="wt-field">City<input name="city" required maxLength={100} placeholder="e.g. Johannesburg"/></label><label className="wt-field">Province<input name="province" required maxLength={100} placeholder="e.g. Gauteng"/></label><label className="wt-field">Standard delivery fee (ZAR)<input name="feeZar" type="number" step=".01" min="0" required placeholder="e.g. 75.00"/></label><label className="wt-check"><input name="active" type="checkbox"/> Enable delivery immediately</label><button type="submit" className="wt-btn orange">Save delivery city</button></form>
  <div className="wt-help">Rates are managed separately from item prices. Enter a fee only after confirming it with your courier.</div>
  </section></div></div>;
+
+}
