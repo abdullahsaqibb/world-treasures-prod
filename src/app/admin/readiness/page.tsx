@@ -21,11 +21,12 @@ export default async function Readiness(){
  // These status bits intentionally reveal no environment variable values or credentials.
  mailConfigured=Boolean(process.env.TRANSACTIONAL_EMAIL_API_KEY);
  const checks:Check[]=[
-  {label:"Staff GitHub OAuth",ok:cfg.oauth&&cfg.sessionSecret&&cfg.allowlist,detail:"OAuth application, session secret and restricted staff access",critical:true},
+  {label:"Owner administration login",ok:cfg.sessionSecret&&(Boolean(process.env.ADMIN_LOGIN_EMAIL&&process.env.ADMIN_PASSWORD_SCRYPT)||(cfg.oauth&&cfg.allowlist)),detail:"Preview owner password login or approved GitHub fallback with a session secret",critical:true},
+  {label:"Login attack prevention",ok:false,detail:"Persistent account/IP throttling and MFA must be added before exposing a public admin domain",critical:true},
   {label:"Database connection",ok:cfg.database&&schema,detail:dbError?"Database connection or schema could not be verified":"Required catalog, order and delivery tables are queryable",critical:true},
   {label:"Migration connection",ok:cfg.directDatabase,detail:"Direct database URL available for reviewed migrations"},
   {label:"Verified products",ok:verified>0,detail:verified+" of "+products+" products checked against supplier details",critical:true},
-  {label:"Publishable catalog",ok:active>0,detail:active+" products marked ACTIVE and verified",critical:true},
+  {label:"Publishable catalog",ok:active>0,detail:active+" products marked ACTIVE and verified. Test/sample listings do not establish launch readiness.",critical:true},
   {label:"Delivery coverage",ok:cities>0,detail:cities+" active cities with active shipping rates",critical:true},
   {label:"PayFast processing",ok:false,detail:"No live checkout, verified ITN webhook or refund reconciliation is implemented",critical:true},
   {label:"Order notifications",ok:false,detail:mailConfigured?"Email credential present; transactional workflows not implemented":"Transactional sender and notification workflows are not connected"},
