@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock} from "../src/lib/catalog-validation";
+import {money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock,checkPublishEligibility} from "../src/lib/catalog-validation";
 
 test("ZAR amounts convert to precise integer cents",()=>{
  assert.equal(money("12.50"),1250);
@@ -41,4 +41,15 @@ test("stock cannot be below reserved units",()=>{
  assert.throws(()=>checkAvailableStock(1,2));
  assert.throws(()=>checkAvailableStock(-1,0));
  assert.throws(()=>checkAvailableStock(5,-1));
+});
+
+test("publishing rejects unverified, unpriced or incomplete products",()=>{
+ const valid={verified:true,name:"Takis Fuego 90g",description:"Imported savoury snack",images:["/products/berry.webp"],variants:[{sku:"WT-TAKIS",priceCents:4990,onHand:3,reserved:0}]};
+ assert.doesNotThrow(()=>checkPublishEligibility(valid));
+ assert.throws(()=>checkPublishEligibility({...valid,verified:false}),/Verify/);
+ assert.throws(()=>checkPublishEligibility({...valid,description:""}),/description/);
+ assert.throws(()=>checkPublishEligibility({...valid,images:[]}),/photo/);
+ assert.throws(()=>checkPublishEligibility({...valid,variants:[]}),/variant/);
+ assert.throws(()=>checkPublishEligibility({...valid,variants:[{...valid.variants[0],priceCents:0}]}),/price/);
+ assert.throws(()=>checkPublishEligibility({...valid,variants:[{...valid.variants[0],onHand:0,reserved:2}]}),/Stock/);
 });
