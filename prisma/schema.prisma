@@ -1,12 +1,40 @@
-// Phase 2 database model DESIGN — install Prisma and migrate only after Phase 1 approval.
-// Prisma 7 connection URLs are configured in prisma.config.ts, not here.
-generator client { provider = "prisma-client" output = "../src/generated/prisma" }
-datasource db { provider = "postgresql" }
+// Phase 2 schema. Run reviewed migrations before enabling the admin portal.
+generator client {
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+ directUrl = env("DATABASE_URL_UNPOOLED")
+}
 
-enum Role { OWNER MANAGER FULFILLMENT CUSTOMER }
-enum ProductStatus { DRAFT ACTIVE ARCHIVED }
-enum OrderStatus { PENDING_PAYMENT PAID PROCESSING SHIPPED DELIVERED CANCELLED REFUNDED }
-enum PaymentStatus { PENDING COMPLETED FAILED CANCELLED REFUNDED }
+enum Role {
+ OWNER
+ MANAGER
+ FULFILLMENT
+ CUSTOMER
+}
+enum ProductStatus {
+ DRAFT
+ ACTIVE
+ ARCHIVED
+}
+enum OrderStatus {
+ PENDING_PAYMENT
+ PAID
+ PROCESSING
+ SHIPPED
+ DELIVERED
+ CANCELLED
+ REFUNDED
+}
+enum PaymentStatus {
+ PENDING
+ COMPLETED
+ FAILED
+ CANCELLED
+ REFUNDED
+}
 model User {
  id String @id @default(cuid())
  email String @unique
@@ -43,6 +71,7 @@ model Product {
  categoryId String
  category Category @relation(fields:[categoryId],references:[id])
  status ProductStatus @default(DRAFT)
+ verified Boolean @default(false)
  images ProductImage[]
  variants ProductVariant[]
  createdAt DateTime @default(now())
@@ -150,4 +179,12 @@ model PaymentEvent {
  payload Json
  verified Boolean @default(false)
  createdAt DateTime @default(now())
+}
+
+/** Editable storefront copy. Drafts stay separate from published text. */
+model StoreContent {
+ key String @id
+ draftValue String
+ publishedValue String?
+ updatedAt DateTime @updatedAt
 }
