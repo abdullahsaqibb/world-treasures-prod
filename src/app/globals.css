@@ -671,3 +671,10 @@ html[data-wt-theme="rose"]{--wt-inspect-bg:#f9eaf0}
   #flavourLab .inspection-data{max-width:100%!important;}
 }
 @media(min-width:761px){.wt-mobile-dock{display:none!important;}}
+
+/* Verified pre-launch notice: do not let a demo payment resemble a completed purchase. */
+.wt-public-launch-note{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;column-gap:13px;row-gap:4px;background:#16283f;color:#fff;padding:11px 5%;font-family:var(--body),sans-serif;font-size:11px;line-height:1.5;position:relative;z-index:4;text-align:center}
+.wt-public-launch-note strong{color:#ffd5b2;font-weight:800;letter-spacing:.02em}
+.wt-public-launch-note span{color:#eef0f4}
+.wt-payment-notice{margin:16px 0 0;padding:14px 15px;border:1px solid #efd5b9;border-radius:8px;background:#fff3e5;color:#623e26;font-size:13px;line-height:1.5}
+@media(max-width:600px){.wt-public-launch-note{font-size:10px;padding:9px 15px}}
