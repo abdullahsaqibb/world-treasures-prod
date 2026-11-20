@@ -1,8 +1,17 @@
 import {signIn} from "@/auth";
+import {headers} from "next/headers";
+import {redirect} from "next/navigation";
 import {adminConfiguration} from "@/lib/admin-config";
 import Link from "next/link";
 export const dynamic="force-dynamic";
-export default function Login(){
+export default async function Login(){
+ const branchHost="world-treasures-prod-git-featur-c374cc-masaqib10-7957s-projects.vercel.app";
+ const host=(await headers()).get("host")?.toLowerCase()??"";
+ // GitHub OAuth callbacks cannot safely follow the immutable URL of every preview deployment.
+ // Route branch preview login attempts to the verified stable branch alias instead.
+ if(process.env.VERCEL_ENV==="preview"&&process.env.VERCEL_GIT_COMMIT_REF==="feature/admin-backend-foundation"&&host!==branchHost&&/^world-treasures-prod-[a-z0-9-]+\.vercel\.app$/.test(host)){
+  redirect("https://"+branchHost+"/admin/login");
+ }
  const cfg=adminConfiguration();
  const configured=cfg.oauth&&cfg.sessionSecret&&cfg.allowlist;
  return <div className="wt-admin-login">
