@@ -20,5 +20,5 @@ export default async function Home() {
  }catch{
   // On a branch whose database has not been migrated yet, render the approved content unchanged.
  }
- return <><div style={{background:"#14243a",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",gap:14,flexWrap:"wrap",padding:"9px 15px",fontFamily:"DM Sans, Arial, sans-serif",fontSize:12}}><span>World Treasures verified product collection</span><a href="/catalog" style={{color:"#ffd2ac",fontWeight:800,textDecoration:"underline"}}>{shopProducts.length>0?`Browse ${shopProducts.length} verified ${shopProducts.length===1?"option":"options"} →`:"View verified collection →"}</a></div><ApprovedRegions overrides={overrides}/><StorefrontHero products={shopProducts}/><LegacyRuntime /><CartExperience products={shopProducts}/></>;
+ return <><div className="wt-public-launch-note" role="note"><strong>World Treasures catalogue preview</strong><span>Product prices and information are being verified. Online orders and payments are not yet enabled.</span><a href="/catalog" style={{color:"#ffd5b2",fontWeight:800,textDecoration:"underline"}}>View verified collection →</a></div><ApprovedRegions overrides={overrides}/><StorefrontHero products={shopProducts}/><LegacyRuntime /><CartExperience products={shopProducts}/></>;
 }
