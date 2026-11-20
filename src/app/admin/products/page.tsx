@@ -19,14 +19,14 @@ export default async function ProductsPage({searchParams}:{searchParams:Promise<
   ...(filter.stock==="out"?{variants:{some:{inventory:{is:{onHand:0}}}}}:filter.stock==="low"?{variants:{some:{inventory:{is:{onHand:{gt:0,lte:5}}}}}}:filter.stock==="available"?{variants:{some:{inventory:{is:{onHand:{gt:5}}}}}}:{})
  };
  const pageInput=Number(f.page),page=Number.isSafeInteger(pageInput)&&pageInput>0?Math.min(pageInput,100000):1,pageSize=25;
- const [products,matching,all,drafts,archived,unverified]=await Promise.all([
+ const [products,matching,all,drafts,published,archived,unverified]=await Promise.all([
  db.product.findMany({where,include:{category:true,images:{take:1,orderBy:{sortOrder:"asc"}},variants:{take:1,include:{inventory:true}}},orderBy:filter.sort==="name"?[{name:"asc"}]:[{updatedAt:"desc"}],take:pageSize,skip:(page-1)*pageSize}),
- db.product.count({where}),db.product.count(),db.product.count({where:{status:"DRAFT"}}),
+ db.product.count({where}),db.product.count(),db.product.count({where:{status:"DRAFT"}}),db.product.count({where:{status:"ACTIVE",verified:true}}),
  db.product.count({where:{status:"ARCHIVED"}}),db.product.count({where:{verified:false}})
  ]);
- const tabs=[{label:"All",val:"all",count:all},{label:"Drafts",val:"draft",count:drafts},{label:"Archived",val:"archived",count:archived}];
+ const tabs=[{label:"All",val:"all",count:all},{label:"Drafts",val:"draft",count:drafts},{label:"Published",val:"active",count:published},{label:"Archived",val:"archived",count:archived}];
  const next=page*pageSize<matching;
- return <div><span className="wt-eyebrow">MERCHANDISE / CATALOG</span><div className="wt-head"><div><h1>Your product collection.</h1><p className="wt-lede">Review, organize and manage product listings. Search by product name, URL or SKU.</p></div><div className="wt-actions"><Link className="wt-btn light" href="/api/admin/products/export">↓ Export CSV</Link><Link className="wt-btn orange" href="/admin/products/new">＋ Add product</Link></div></div>
+ return <div><span className="wt-eyebrow">MERCHANDISE / CATALOG</span><div className="wt-head"><div><h1>Your product collection.</h1><p className="wt-lede">Review, organize and manage product listings. Search by product name, URL or SKU.</p></div><div className="wt-actions"><Link className="wt-btn light" href="/catalog" target="_blank" rel="noopener noreferrer">↗ Storefront catalog</Link><Link className="wt-btn light" href="/api/admin/products/export">↓ Export CSV</Link><Link className="wt-btn orange" href="/admin/products/new">＋ Add product</Link></div></div>
  <div className="wt-grid"><div className="wt-stat"><small>Total products</small><b>{all}</b><span>Development catalog</span></div><div className="wt-stat"><small>Unverified listings</small><b>{unverified}</b><span>Need supplier or label confirmation</span></div><div className="wt-stat"><small>Draft listings</small><b>{drafts}</b><span>Not published to customers</span></div><div className="wt-stat"><small>Archived</small><b>{archived}</b><span>Stored in the catalog</span></div></div>
  <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">CATALOG LIBRARY</span><h2>Manage your products <span className="wt-muted">({matching} matching)</span></h2></div><div className="wt-actions">{tabs.map(t=><Link className={"wt-btn "+(filter.status===t.val?"":"light")} key={t.val} href={"/admin/products?"+queryString(filter,{status:t.val,page:"1"})}>{t.label} ({t.count})</Link>)}</div></div>
  <form method="get" className="wt-catalog-filters" aria-label="Filter product catalog">
@@ -42,6 +42,6 @@ export default async function ProductsPage({searchParams}:{searchParams:Promise<
  </tbody></table></div>
  {products.length===0&&<div className="wt-empty"><h3>No matching products</h3><p>Try changing filters, or create a new item.</p><Link className="wt-btn orange" href="/admin/products/new">Add a product →</Link></div>}
  <div className="wt-table-pagination"><span>Showing {products.length?((page-1)*pageSize+1):0}–{Math.min(page*pageSize,matching)} of {matching} products</span><div className="wt-actions">{page>1&&<Link className="wt-btn light" href={"/admin/products?"+queryString(filter,{page:String(page-1)})}>← Previous</Link>}{next&&<Link className="wt-btn light" href={"/admin/products?"+queryString(filter,{page:String(page+1)})}>Next →</Link>}</div></div>
- </section><div className="wt-help"><strong>Development only:</strong> Imported inventory and prices are provisional. These records are not automatically reflected on the approved public storefront.</div>
+ </section><div className="wt-help"><strong>Development only:</strong> Imported inventory and prices are provisional. Only products explicitly marked VERIFIED and PUBLISHED appear in the development verified catalogue. The original showcase carousel remains unchanged.</div>
  </div>;
 }
