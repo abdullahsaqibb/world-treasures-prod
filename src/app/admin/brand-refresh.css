@@ -142,3 +142,13 @@
 
 /* Product variant manager: ergonomic disclosure panels, no destructive controls. */
 .wt-admin .wt-variant-manager{max-width:1520px;margin:26px auto 0}.wt-admin .wt-variant-list{display:grid;gap:10px;margin:21px 0}.wt-admin .wt-variant-entry{border:1px solid #e2dbce;border-radius:10px;background:#fff;overflow:hidden;margin-bottom:10px}.wt-admin .wt-variant-entry>summary{display:flex;align-items:center;gap:17px;padding:16px;cursor:pointer;list-style:none;flex-wrap:wrap}.wt-admin .wt-variant-entry>summary::-webkit-details-marker{display:none}.wt-admin .wt-variant-entry>summary strong{font-family:"Bricolage Grotesque",sans-serif;font-size:15px}.wt-admin .wt-variant-entry>summary span,.wt-admin .wt-variant-entry>summary small{font-size:11px;color:#717b88}.wt-admin .wt-variant-entry>summary b{margin-left:auto;font-size:14px;white-space:nowrap}.wt-admin .wt-variant-entry>summary .wt-variant-edit{font-size:11px;color:#b55d39;font-weight:800}.wt-admin .wt-variant-entry[open]{border-color:#d6b797}.wt-admin .wt-variant-form{padding:21px 16px 17px;border-top:1px solid #e9e3d8;background:#fbf7f0}.wt-admin .wt-variant-new>summary{background:#f0e5f6}.wt-admin .wt-variant-new>summary strong{color:#532f72}.wt-admin .wt-variant-manager .wt-help{margin-top:18px}@media(max-width:630px){.wt-admin .wt-variant-entry>summary{gap:8px}.wt-admin .wt-variant-entry>summary b{margin-left:0}.wt-admin .wt-variant-entry>summary .wt-variant-edit{margin-left:auto}}
+
+/* Existing product imagery and local preflight thumbnails. */
+.wt-admin .wt-media-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:13px;margin:16px 0 22px}
+.wt-admin .wt-media-preview-item{min-width:0;display:flex;flex-direction:column;gap:7px;padding:10px;background:#fff;border:1px solid #e6ded2;border-radius:10px}
+.wt-admin .wt-media-preview-item img{width:100%;height:146px;object-fit:contain;border-radius:7px;background:#f3e6ee}
+.wt-admin .wt-media-preview-item strong{font-family:"Bricolage Grotesque",sans-serif;font-size:13px;overflow-wrap:anywhere}
+.wt-admin .wt-media-preview-item small{font-size:10px;color:#747c85;overflow-wrap:anywhere}
+.wt-admin .wt-media-preview-item .wt-btn{margin-top:auto;justify-content:center}
+.wt-admin .wt-media-imagebox{width:100%;overflow:hidden;background:#f3e6ee;border-radius:7px}
+@media(max-width:520px){.wt-admin .wt-media-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.wt-admin .wt-media-preview-item img{height:116px}}
