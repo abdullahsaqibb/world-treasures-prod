@@ -33,7 +33,7 @@ export default async function AdminDashboard(){
  </div><div>
  <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">LAUNCH CHECKLIST</span><h2>Store readiness</h2></div></div><div className="wt-setup-timeline">
  <div className="wt-setup-step"><span className="wt-setup-check">✓</span><div><strong>Development database</strong><small>Connected and populated</small></div></div>
- <div className="wt-setup-step"><span className="wt-setup-check">✓</span><div><strong>Staff authentication</strong><small>Restricted GitHub administrator access</small></div></div>
+ <div className="wt-setup-step"><span className="wt-setup-check">✓</span><div><strong>Staff authentication</strong><small>Owner credentials and approved GitHub fallback</small></div></div>
  <div className="wt-setup-step pending"><span className="wt-setup-check">○</span><div><strong>Verify product information</strong><small>{drafts} drafts · {unverified} unverified items</small></div></div>
  <div className="wt-setup-step pending"><span className="wt-setup-check">○</span><div><strong>Checkout and PayFast</strong><small>Not yet connected to transactions</small></div></div>
  <div className="wt-setup-step pending"><span className="wt-setup-check">○</span><div><strong>Customer sign-in & email</strong><small>Planned: guest, Google and email options</small></div></div>
