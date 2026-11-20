@@ -1,6 +1,7 @@
 import {auth} from "@/auth";
 import {db} from "@/lib/db";
 import {NextResponse} from "next/server";
+import {isAuthorizedAdminId} from "@/lib/admin-config";
 export const dynamic="force-dynamic";
 function cell(value:string|number|boolean|null|undefined){
  let v=String(value??"");
@@ -10,8 +11,7 @@ function cell(value:string|number|boolean|null|undefined){
 }
 export async function GET(){
  const session=await auth();
- const allowlist=new Set((process.env.ADMIN_GITHUB_IDS??"").split(",").map(s=>s.trim()).filter(Boolean));
- if(!session?.user?.id||!allowlist.has(session.user.id))
+ if(!isAuthorizedAdminId(session?.user?.id))
   return NextResponse.json({error:"Unauthorized"},{status:401,headers:{"Cache-Control":"no-store"}});
  const products=await db.product.findMany({select:{name:true,slug:true,status:true,verified:true,category:{select:{name:true}},variants:{select:{sku:true,label:true,priceCents:true,weightGrams:true,inventory:{select:{onHand:true,reserved:true}}}}},orderBy:{name:"asc"}});
  const header=["Product name","Product URL","Category","SKU","Variant","Price (ZAR)","On hand","Reserved","Weight (g)","Status","Verified"];
