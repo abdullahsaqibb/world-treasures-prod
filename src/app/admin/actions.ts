@@ -17,10 +17,8 @@ async function updateInventoryWithoutDroppingReservations(tx:Prisma.TransactionC
 }
 import { requireAdmin } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock } from "@/lib/catalog-validation";
 
-function money(value:FormDataEntryValue|null){const s=String(value??"");if(!/^\d+(\.\d{1,2})?$/.test(s))throw new Error("Enter a non-negative ZAR amount (up to two decimals)");const [r,c=""]=s.split(".");const n=Number(r)*100+Number(c.padEnd(2,"0"));if(!Number.isSafeInteger(n)||n>100000000)throw new Error("Amount exceeds limit");return n;}
-function qty(value:FormDataEntryValue|null){const s=String(value??"");if(!/^\d+$/.test(s))throw new Error("Invalid stock quantity");const n=Number(s);if(!Number.isSafeInteger(n)||n>1000000)throw new Error("Invalid stock quantity");return n;}
-function clean(value:FormDataEntryValue|null,max=150){const text=String(value??"").trim();if(!text||text.length>max)throw new Error("Invalid text input");return text;}
 export async function saveProduct(form:FormData){
  await requireAdmin();
  const productId=clean(form.get("productId"),128);
@@ -30,7 +28,7 @@ export async function saveProduct(form:FormData){
  const product=await db.product.findUnique({where:{id:productId},include:{variants:{include:{inventory:true},take:1}}});
  if(!product||!product.variants[0])throw new Error("Unknown product");
  const variant=product.variants[0];
- if(stock<(variant.inventory?.reserved??0))throw new Error("Stock cannot be lower than units reserved for orders");
+ checkAvailableStock(stock,variant.inventory?.reserved??0);
  await db.$transaction(async tx=>{
   // Check again within the transaction to avoid silently reducing stock beneath reservations.
   await tx.product.update({where:{id:productId},data:{name}});
@@ -61,16 +59,6 @@ export async function updateDeliveryRate(form:FormData){
  revalidatePath("/admin/delivery");
 }
 
-function optionalText(value:FormDataEntryValue|null,max=1500) {
- const result=String(value??"").trim();if(result.length>max)throw new Error("Text too long");return result;
-}
-function slugify(value:string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
-function imagePath(value:string){
- if(!value)return null;
- if(value.startsWith("/")&&!value.startsWith("//")&&!/\s/.test(value))return value;
- if(/^https:\/\/[^\s]+$/i.test(value))return value;
- throw new Error("Image must be a secure https URL or a local /products/... path");
-}
 export async function createCatalogProduct(form:FormData){
  await requireAdmin();
  const name=clean(form.get("name"),150);
@@ -117,7 +105,7 @@ export async function updateCatalogProduct(form:FormData){
  const existing=await db.product.findUnique({where:{id},include:{variants:{include:{inventory:true},take:1},images:{orderBy:{sortOrder:"asc"},take:1}}});
  if(!existing?.variants[0])throw new Error("Product not found");
  const variant=existing.variants[0];
- if(stock<(variant.inventory?.reserved??0))throw new Error("Stock cannot be lower than quantity already reserved");
+ checkAvailableStock(stock,variant.inventory?.reserved??0);
  if(!await db.category.findUnique({where:{id:categoryId}}))throw new Error("Choose a valid category");
  await db.$transaction(async tx=>{
   await tx.product.update({where:{id},data:{name,slug,description,categoryId,status,verified}});
