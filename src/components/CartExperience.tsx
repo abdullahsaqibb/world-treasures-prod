@@ -31,11 +31,13 @@ export function CartExperience({products}:{products:Product[]}){
  const [guestEmail,setGuestEmail]=useState("");
  const [guestName,setGuestName]=useState("");
  const [guestPhone,setGuestPhone]=useState("");
+ const [addressLine1,setAddressLine1]=useState("");
+ const [addressLine2,setAddressLine2]=useState("");
+ const [postalCode,setPostalCode]=useState("");
  const [cityId,setCityId]=useState("");
  const [cities,setCities]=useState<DeliveryCity[]>([]);
  const [shippingCents,setShippingCents]=useState<number|null>(null);
  const [deliveryError,setDeliveryError]=useState("");
- const [checkoutNotice,setCheckoutNotice]=useState("");
  const [targets,setTargets]=useState<{grid:HTMLElement|null;contents:HTMLElement|null;checkout:HTMLElement|null;filters:HTMLElement|null}>({grid:null,contents:null,checkout:null,filters:null});
  useEffect(()=>{
   setCart(readCart(catalog));
@@ -84,7 +86,7 @@ export function CartExperience({products}:{products:Product[]}){
   setCart(prev=>{const next={...prev},qty=Math.max(0,Math.min(99,p.stock,(prev[id]||0)+delta));if(qty)next[id]=qty;else delete next[id];return next;});
  }
  function add(p:Product){change(p.id,1);setNotice(p.name+" added to bag");}
- function startCheckout(){setBagOpen(false);setStep("bag");setExpanded(false);setCheckoutNotice("");setCheckoutOpen(true);}
+ function startCheckout(){setBagOpen(false);setStep("bag");setExpanded(false);setCheckoutOpen(true);}
  useEffect(()=>{
   if(!checkoutOpen)return;
   const controller=new AbortController();
@@ -146,13 +148,16 @@ export function CartExperience({products}:{products:Product[]}){
   <label>Your name<input type="text" autoComplete="name" required maxLength={120} value={guestName} onChange={e=>setGuestName(e.target.value)} placeholder="Full name"/></label>
   <label>Email address<input type="email" autoComplete="email" required maxLength={254} value={guestEmail} onChange={e=>setGuestEmail(e.target.value)} placeholder="name@example.com"/></label>
   <label>Phone number<input type="tel" autoComplete="tel" required maxLength={30} value={guestPhone} onChange={e=>setGuestPhone(e.target.value)} placeholder="South African contact number"/></label>
+  <label>Street address<input type="text" autoComplete="address-line1" required maxLength={200} value={addressLine1} onChange={e=>setAddressLine1(e.target.value)} placeholder="Street address"/></label>
+  <label>Apartment or unit (optional)<input type="text" autoComplete="address-line2" maxLength={200} value={addressLine2} onChange={e=>setAddressLine2(e.target.value)} placeholder="Unit, floor or building"/></label>
+  <label>Postal code<input type="text" autoComplete="postal-code" required maxLength={12} value={postalCode} onChange={e=>setPostalCode(e.target.value)} placeholder="Postal code"/></label>
   <label>Delivery city<select value={cityId} required onChange={e=>setCityId(e.target.value)}><option value="">Choose city</option>{cities.map(city=><option key={city.id} value={city.id}>{city.name}, {city.province}</option>)}</select></label>
   {shippingCents!==null&&<p role="status">Standard delivery preview: <strong>{zar(shippingCents)}</strong></p>}
   {deliveryError&&<p role="alert">{deliveryError}</p>}
   <button className="wt-cart-primary" type="submit">Review payment placeholder →</button>
   <button className="wt-cart-secondary" type="button" onClick={()=>setStep("bag")}>← Back to bag</button>
  </form>}
- {step==="payment"&&<div className="wt-cart-step"><h3>Payment is not enabled</h3><p>Your guest details remain only in this browser session. No order has been placed, no email has been sent, and no payment has been collected.</p><div className="wt-cart-total"><span>Items</span><strong>{zar(total)}</strong></div>{shippingCents!==null&&<div className="wt-cart-total"><span>Delivery estimate</span><strong>{zar(shippingCents)}</strong></div>}<div className="wt-cart-total"><span>Estimated total</span><strong>{zar(total+(shippingCents??0))}</strong></div><button type="button" className="wt-cart-primary" disabled>Payments coming soon — unavailable</button>{checkoutNotice&&<p role="status">{checkoutNotice}</p>}<button className="wt-cart-secondary" onClick={()=>setStep("delivery")}>← Back to delivery</button></div>}
+ {step==="payment"&&<div className="wt-cart-step"><h3>Payment is not enabled</h3><p>Your guest details remain only in this browser session. No order has been placed, no email has been sent, and no payment has been collected.</p><div className="wt-cart-total"><span>Items</span><strong>{zar(total)}</strong></div>{shippingCents!==null&&<div className="wt-cart-total"><span>Delivery estimate</span><strong>{zar(shippingCents)}</strong></div>}<div className="wt-cart-total"><span>Estimated total</span><strong>{zar(total+(shippingCents??0))}</strong></div><button type="button" className="wt-cart-primary" disabled>Payments coming soon — unavailable</button><button className="wt-cart-secondary" onClick={()=>setStep("delivery")}>← Back to delivery</button></div>}
  </div>;
  if(!mounted)return null;
  return <>{targets.grid&&createPortal(productsGrid,targets.grid)}{targets.filters&&createPortal(filters,targets.filters)}{targets.contents&&createPortal(bagContents,targets.contents)}{targets.checkout&&createPortal(checkoutContents,targets.checkout)}
