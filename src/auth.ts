@@ -1,11 +1,11 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
-const allowed = () => new Set((process.env.ADMIN_GITHUB_IDS ?? "").split(",").map(s=>s.trim()).filter(Boolean));
+import { isAuthorizedAdminId } from "@/lib/admin-config";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [GitHub({ issuer: "https://github.com/login/oauth" })],
   session: { strategy: "jwt" },
   callbacks: {
-    async signIn({ account, profile }) { return account?.provider === "github" && !!profile && allowed().has(String(profile.id)); },
+    async signIn({ account, profile }) { return account?.provider === "github" && !!profile && isAuthorizedAdminId(String(profile.id)); },
     async jwt({ token, account, profile }) {
       if (account?.provider === "github" && profile?.id !== undefined) token.githubId=String(profile.id);
       return token;
@@ -19,6 +19,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 });
 export async function requireAdmin() {
   const session = await auth();
-  if (!session?.user?.id || !allowed().has(session.user.id)) throw new Error("Unauthorized");
+  if (!session?.user?.id || !isAuthorizedAdminId(session.user.id)) throw new Error("Unauthorized");
   return session;
 }
