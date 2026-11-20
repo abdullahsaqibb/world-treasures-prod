@@ -16,3 +16,12 @@ export function inspectMediaSelection(candidates:MediaCandidate[]):string[]{
  if(candidates.length>MEDIA_MAX_FILES)return ["Select at most 8 images per product."];
  return candidates.map((file,i)=>{const error=inspectMediaCandidate(file);return error?file.name+": "+error:"";}).filter(Boolean);
 }
+
+export function imageSignatureMatches(type:string,buf:Uint8Array):boolean{
+ const ascii=(start:number,end:number)=>String.fromCharCode(...buf.slice(start,end));
+ if(type==="image/jpeg")return buf[0]===255&&buf[1]===216&&buf[2]===255;
+ if(type==="image/png")return buf[0]===137&&ascii(1,4)==="PNG"&&buf[4]===13&&buf[5]===10&&buf[6]===26&&buf[7]===10;
+ if(type==="image/webp")return ascii(0,4)==="RIFF"&&ascii(8,12)==="WEBP";
+ if(type==="image/avif")return ascii(4,8)==="ftyp"&&(ascii(8,12)==="avif"||ascii(8,12)==="avis");
+ return false;
+}
