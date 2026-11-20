@@ -1,6 +1,7 @@
 import { ApprovedRegions } from "@/components/ApprovedRegions";
 import { LegacyRuntime } from "@/components/LegacyRuntime";
 import { CartExperience } from "@/components/CartExperience";
+import { StorefrontHero } from "@/components/StorefrontHero";
 import { db } from "@/lib/db";
 import { getPublishedProducts } from "@/lib/published-catalog";
 import {toStorefrontItems,type StorefrontItem} from "@/lib/storefront-products";
@@ -19,5 +20,5 @@ export default async function Home() {
  }catch{
   // On a branch whose database has not been migrated yet, render the approved content unchanged.
  }
- return <><div style={{background:"#14243a",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",gap:14,flexWrap:"wrap",padding:"9px 15px",fontFamily:"DM Sans, Arial, sans-serif",fontSize:12}}><span>World Treasures verified product collection</span><a href="/catalog" style={{color:"#ffd2ac",fontWeight:800,textDecoration:"underline"}}>{shopProducts.length>0?`Browse ${shopProducts.length} verified ${shopProducts.length===1?"option":"options"} →`:"View verified collection →"}</a></div><ApprovedRegions overrides={overrides}/><LegacyRuntime /><CartExperience products={shopProducts}/></>;
+ return <><div style={{background:"#14243a",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",gap:14,flexWrap:"wrap",padding:"9px 15px",fontFamily:"DM Sans, Arial, sans-serif",fontSize:12}}><span>World Treasures verified product collection</span><a href="/catalog" style={{color:"#ffd2ac",fontWeight:800,textDecoration:"underline"}}>{shopProducts.length>0?`Browse ${shopProducts.length} verified ${shopProducts.length===1?"option":"options"} →`:"View verified collection →"}</a></div><ApprovedRegions overrides={overrides}/><StorefrontHero products={shopProducts}/><LegacyRuntime /><CartExperience products={shopProducts}/></>;
 }
