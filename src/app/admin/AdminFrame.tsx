@@ -5,7 +5,7 @@ import {useState} from "react";
 
 type NavItem={label:string;href:string;icon:string;planned?:boolean};
 const nav: {heading:string;items:NavItem[]}[]=[
- {heading:"Workspace",items:[{label:"Overview",href:"/admin",icon:"overview"},{label:"Orders",href:"/admin/orders",icon:"orders"},{label:"Customers",href:"/admin/customers",icon:"users"}]},
+ {heading:"Workspace",items:[{label:"Overview",href:"/admin",icon:"overview"},{label:"Launch readiness",href:"/admin/readiness",icon:"lock"},{label:"Orders",href:"/admin/orders",icon:"orders"},{label:"Customers",href:"/admin/customers",icon:"users"}]},
  {heading:"Merchandise",items:[{label:"Products",href:"/admin/products",icon:"products"},{label:"Categories",href:"/admin/categories",icon:"categories"},{label:"Delivery zones",href:"/admin/delivery",icon:"truck"},{label:"Discounts",href:"/admin/promotions",icon:"ticket",planned:true}]},
  {heading:"Experience",items:[{label:"Storefront editor",href:"/admin/storefront",icon:"monitor"},{label:"Media library",href:"/admin/media",icon:"image",planned:true},{label:"Analytics",href:"/admin/analytics",icon:"chart",planned:true}]},
  {heading:"Configuration",items:[{label:"Payments",href:"/admin/payments",icon:"wallet",planned:true},{label:"Email & notifications",href:"/admin/notifications",icon:"mail",planned:true},{label:"Customer accounts",href:"/admin/accounts",icon:"lock",planned:true},{label:"Store settings",href:"/admin/settings",icon:"settings",planned:true}]}
