@@ -1,4 +1,5 @@
 import test from "node:test";
+import {canAppearInPublicCatalog,publicProductWhere} from "../src/lib/product-visibility";
 import assert from "node:assert/strict";
 import {money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock,checkPublishEligibility} from "../src/lib/catalog-validation";
 
@@ -52,4 +53,12 @@ test("publishing rejects unverified, unpriced or incomplete products",()=>{
  assert.throws(()=>checkPublishEligibility({...valid,variants:[]}),/variant/);
  assert.throws(()=>checkPublishEligibility({...valid,variants:[{...valid.variants[0],priceCents:0}]}),/price/);
  assert.throws(()=>checkPublishEligibility({...valid,variants:[{...valid.variants[0],onHand:0,reserved:2}]}),/Stock/);
+});
+
+test("public catalog never displays drafts, archives or unverified records",()=>{
+ assert.deepEqual(publicProductWhere,{status:"ACTIVE",verified:true});
+ assert.equal(canAppearInPublicCatalog({status:"ACTIVE",verified:true}),true);
+ assert.equal(canAppearInPublicCatalog({status:"ACTIVE",verified:false}),false);
+ assert.equal(canAppearInPublicCatalog({status:"DRAFT",verified:true}),false);
+ assert.equal(canAppearInPublicCatalog({status:"ARCHIVED",verified:true}),false);
 });
