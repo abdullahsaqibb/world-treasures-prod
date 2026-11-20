@@ -1,7 +1,8 @@
 import {db} from "@/lib/db";
+import {publicProductWhere} from "@/lib/product-visibility";
 
 /** Public reads are intentionally restricted to both verified and published records. */
-export const publicProductWhere={status:"ACTIVE" as const,verified:true};
+export {publicProductWhere} from "@/lib/product-visibility";
 
 export async function getPublishedProducts(){
  return db.product.findMany({
