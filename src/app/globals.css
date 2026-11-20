@@ -671,3 +671,12 @@ html[data-wt-theme="rose"]{--wt-inspect-bg:#f9eaf0}
   #flavourLab .inspection-data{max-width:100%!important;}
 }
 @media(min-width:761px){.wt-mobile-dock{display:none!important;}}
+
+/* Database-backed featured photos adapt to the approved carousel footprint. */
+.stage-deck .wt-live-hero-touch{position:absolute;inset:0;touch-action:pan-y}
+.stage-deck .wt-live-stage-pack{width:100%;height:100%;background:transparent!important}
+.stage-deck .wt-live-stage-pack:before,.stage-deck .wt-live-stage-pack:after{display:none!important}
+.stage-deck .wt-live-stage-pack .hero-front{width:100%;height:100%;display:grid;place-items:center}
+.stage-deck .wt-live-stage-pack .hero-front img{width:100%;height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 22px 17px #17223532);user-select:none;-webkit-user-drag:none}
+@media(max-width:600px){.stage-deck .wt-live-stage-pack .hero-front img{object-fit:contain}}
+@media(prefers-reduced-motion:reduce){.stage-deck .wt-live-hero-touch .stage-float{animation:none!important}.stage-deck .wt-live-hero-touch .stage-slot{transition:none!important}}

@@ -7,25 +7,28 @@ type Check={label:string;ok:boolean;detail:string;critical?:boolean};
 export default async function Readiness(){
  await ensureAdminPage();
  const cfg=adminConfiguration();
- let schema=false,dbError=false,products=0,verified=0,active=0,cities=0,orders=0,mailConfigured=false;
+ let schema=false,dbError=false,products=0,verified=0,active=0,cities=0,orders=0,mailConfigured=false,rateLimitTable=false;
  try {
   const [p,v,a,c,o]=await Promise.all([
    db.product.count(),
    db.product.count({where:{verified:true}}),
-   db.product.count({where:{status:"ACTIVE",verified:true}}),
+   db.product.count({where:{status:"ACTIVE",verified:true,NOT:{slug:"test"}}}),
    db.city.count({where:{active:true,rates:{some:{active:true}}}}),
    db.order.count()
   ]);
   schema=true;products=p;verified=v;active=a;cities=c;orders=o;
+  try{await db.adminLoginAttempt.count();rateLimitTable=true;}catch{rateLimitTable=false;}
  }catch{dbError=true}
  // These status bits intentionally reveal no environment variable values or credentials.
  mailConfigured=Boolean(process.env.TRANSACTIONAL_EMAIL_API_KEY);
  const checks:Check[]=[
-  {label:"Staff GitHub OAuth",ok:cfg.oauth&&cfg.sessionSecret&&cfg.allowlist,detail:"OAuth application, session secret and restricted staff access",critical:true},
+  {label:"Owner administration login",ok:cfg.sessionSecret&&(Boolean(process.env.ADMIN_LOGIN_EMAIL&&process.env.ADMIN_PASSWORD_SCRYPT)||(cfg.oauth&&cfg.allowlist)),detail:"Preview owner password login or approved GitHub fallback with a session secret",critical:true},
+  {label:"Owner login throttling",ok:rateLimitTable,detail:rateLimitTable?"Shared database-backed attempts table is available; live abuse tests remain pending":"Login-attempt table or database is unavailable",critical:true},
+  {label:"Owner authenticator MFA",ok:Boolean(process.env.ADMIN_TOTP_SECRET),detail:process.env.ADMIN_TOTP_SECRET?"Authenticator secret configured; real app enrollment still needs verification":"No authenticator secret configured. Required before production owner credentials.",critical:true},
   {label:"Database connection",ok:cfg.database&&schema,detail:dbError?"Database connection or schema could not be verified":"Required catalog, order and delivery tables are queryable",critical:true},
   {label:"Migration connection",ok:cfg.directDatabase,detail:"Direct database URL available for reviewed migrations"},
   {label:"Verified products",ok:verified>0,detail:verified+" of "+products+" products checked against supplier details",critical:true},
-  {label:"Publishable catalog",ok:active>0,detail:active+" products marked ACTIVE and verified",critical:true},
+  {label:"Publishable catalog",ok:active>0,detail:active+" non-test products marked ACTIVE and verified. Test/sample listings do not establish launch readiness.",critical:true},
   {label:"Delivery coverage",ok:cities>0,detail:cities+" active cities with active shipping rates",critical:true},
   {label:"PayFast processing",ok:false,detail:"No live checkout, verified ITN webhook or refund reconciliation is implemented",critical:true},
   {label:"Order notifications",ok:false,detail:mailConfigured?"Email credential present; transactional workflows not implemented":"Transactional sender and notification workflows are not connected"},

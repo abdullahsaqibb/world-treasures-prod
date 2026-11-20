@@ -16,16 +16,8 @@ async function updateInventoryWithoutDroppingReservations(tx:Prisma.TransactionC
  await tx.inventory.create({data:{variantId,onHand,reserved:0}});
 }
 
-/** Preserve the primary image and its ordered gallery. All URLs must be HTTPS or local paths. */
-function galleryFromForm(form:FormData):string[]{
- const cover=imagePath(optionalText(form.get("image"),1200));
- const lines=optionalText(form.get("galleryUrls"),7800).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
- if(lines.length>7)throw new Error("Maximum 8 product images including the cover");
- const urls=[...(cover?[cover]:[]),...lines.map(x=>imagePath(x)!)];
- return [...new Set(urls)];
-}
-
 import { requireAdmin } from "@/auth";
+import {galleryFromForm} from "@/lib/catalog-images";
 import { revalidatePath } from "next/cache";
 import { money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock,checkPublishEligibility } from "@/lib/catalog-validation";
 

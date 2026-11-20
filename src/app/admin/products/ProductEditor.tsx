@@ -4,7 +4,7 @@ import {useActionState,useEffect,useState} from "react";
 import {useRouter} from "next/navigation";
 import {createCatalogProductState,updateCatalogProductState,type CatalogFormState} from "../actions";
 import {PendingSubmit} from "../PendingSubmit";
-import {R2Uploader} from "../media/R2Uploader";
+import {CloudinaryUploader} from "../media/CloudinaryUploader";
 type CategoryOption={id:string;name:string};
 type ProductData={id:string;name:string;slug:string;description:string|null;verified:boolean;status:"DRAFT"|"ACTIVE"|"ARCHIVED";categoryId:string;image:string;gallery:string[];sku:string;priceCents:number;stock:number;reserved:number;weightGrams:number|null};
 export default function ProductEditor({categories,product}:{categories:CategoryOption[],product?:ProductData}){
@@ -45,11 +45,11 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
    </div>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">STEP 03 / PHOTOGRAPHY</span><h2>Make it look irresistible</h2></div><span className="wt-badge">Image</span></div>
-   <p className="wt-lede">Save product photos in display order. Use HTTPS links, existing product paths, or the Cloudflare R2 uploader when configured.</p>
+   <p className="wt-lede">Save product photos in display order. Use HTTPS links, existing product paths, or the Cloudinary uploader when configured.</p>
    <label className="wt-field">Main product image<small>Image preview updates automatically on the right</small><input name="image" maxLength={1200} value={image} onChange={e=>{setImage(e.target.value);setImageFailed(false);}} placeholder="/products/takis.webp or https://…"/></label>
    <label className="wt-field">Additional gallery images (one URL per line)<small>Up to 7 additional photos. The main image appears first in the storefront gallery.</small><textarea name="galleryUrls" rows={4} maxLength={7800} value={gallery} onChange={e=>setGallery(e.target.value)} placeholder={"https://example.com/front.webp\\nhttps://example.com/back.webp"}/></label>
-   <R2Uploader onUploaded={url=>{if(!image){setImage(url);setImageFailed(false)}else{setGallery(current=>[...new Set([...current.split("\\n").filter(Boolean),url])].join("\\n"))}}}/>
-   <div className="wt-help">Upload uses Cloudflare R2 after configuration. New images are only linked to your product after you save the product form.</div>
+   <CloudinaryUploader onUploaded={url=>{if(!image){setImage(url);setImageFailed(false)}else{setGallery(current=>[...new Set([...current.split("\n").map(u=>u.trim()).filter(Boolean),url])].join("\n"))}}}/>
+   <div className="wt-help">Upload uses Cloudinary in this development preview. New images are only linked to your product after you save the product form.</div>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">STEP 04 / QUALITY CONTROL</span><h2>Review the listing</h2></div></div>
    <p className="wt-help">Publishing requires verified packaging, a description, real pricing and at least one image. Published products appear in the development storefront catalog; payments remain disabled.</p>

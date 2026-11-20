@@ -188,3 +188,10 @@ model StoreContent {
  publishedValue String?
  updatedAt DateTime @updatedAt
 }
+
+/** Shared across Vercel functions: hashed login-throttle identifiers, no raw IP/email. */
+model AdminLoginAttempt {
+ key String @id
+ attempts Int @default(0)
+ windowStart DateTime @default(now()) @db.Timestamptz(6)
+}
