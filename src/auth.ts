@@ -4,10 +4,11 @@ import Credentials from "next-auth/providers/credentials";
 import {scryptSync,timingSafeEqual} from "node:crypto";
 import {isAuthorizedAdminId} from "@/lib/admin-config";
 import {allowOwnerSignIn,clearOwnerSignInFailures} from "@/lib/admin-login-limit";
+import {verifyTotp} from "@/lib/totp";
 
 const LOCAL_ID="world-treasures-local-owner";
 function localEnabled(){
- return (process.env.VERCEL_ENV!=="production"||process.env.ADMIN_CREDENTIALS_PRODUCTION_ENABLED==="true") &&
+ return (process.env.VERCEL_ENV!=="production"||(process.env.ADMIN_CREDENTIALS_PRODUCTION_ENABLED==="true"&&Boolean(process.env.ADMIN_TOTP_SECRET))) &&
   Boolean(process.env.ADMIN_LOGIN_EMAIL&&process.env.ADMIN_PASSWORD_SCRYPT&&process.env.AUTH_SECRET);
 }
 function checkPassword(candidate:string){
@@ -26,7 +27,7 @@ export const {handlers,auth,signIn,signOut}=NextAuth({
   Credentials({
    id:"credentials",
    name:"Owner email and password",
-   credentials:{email:{label:"Email",type:"email"},password:{label:"Password",type:"password"}},
+   credentials:{email:{label:"Email",type:"email"},password:{label:"Password",type:"password"},otp:{label:"Authenticator code",type:"text"}},
    async authorize(input,request){
     if(!localEnabled())return null;
     const email=String(input?.email??"").trim().toLowerCase();
@@ -38,8 +39,10 @@ export const {handlers,auth,signIn,signOut}=NextAuth({
     if(!await allowOwnerSignIn(email,request))return null;
     const passwordOk=checkPassword(password);
     if(email!==owner||!passwordOk)return null;
+    const mfaSecret=process.env.ADMIN_TOTP_SECRET?.trim();
+    if(mfaSecret&&!verifyTotp(mfaSecret,String(input?.otp??"")))return null;
     await clearOwnerSignInFailures(email,request);
-    return {id:LOCAL_ID,email:owner,name:"World Treasures Owner"};
+    return {id:LOCAL_ID,email:owner,name:"World Treasures Owner",ownerMfa:true};
    }
   })
  ],
@@ -47,12 +50,13 @@ export const {handlers,auth,signIn,signOut}=NextAuth({
  callbacks:{
   async signIn({account,profile,user}){
    if(account?.provider==="credentials")return localEnabled()&&user?.id===LOCAL_ID;
-   return account?.provider==="github"&&!!profile&&isAuthorizedAdminId(String(profile.id));
+   return account?.provider==="github"&&(process.env.VERCEL_ENV!=="production"||process.env.ADMIN_GITHUB_PRODUCTION_ENABLED==="true")&&!!profile&&isAuthorizedAdminId(String(profile.id));
   },
   async jwt({token,account,profile,user}){
    if(account?.provider==="credentials"&&user?.id===LOCAL_ID){
     token.adminMethod="credentials";
     token.githubId=undefined;
+    token.ownerMfa=(user as {ownerMfa?:boolean}).ownerMfa===true;
    }else if(account?.provider==="github"&&profile?.id!==undefined){
     token.adminMethod="github";
     token.githubId=String(profile.id);
@@ -61,7 +65,7 @@ export const {handlers,auth,signIn,signOut}=NextAuth({
   },
   async session({session,token}){
    if(session.user){
-    session.user.id=token.adminMethod==="credentials"&&localEnabled()?LOCAL_ID:
+    session.user.id=token.adminMethod==="credentials"&&localEnabled()&&(!process.env.ADMIN_TOTP_SECRET||token.ownerMfa===true)?LOCAL_ID:
       token.adminMethod==="github"?String(token.githubId??""):"";
    }
    return session;
