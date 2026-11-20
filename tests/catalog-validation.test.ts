@@ -1,5 +1,5 @@
 import test from "node:test";
-import {inspectMediaCandidate,inspectMediaSelection,MEDIA_MAX_BYTES} from "../src/lib/media-policy";
+import {inspectMediaCandidate,inspectMediaSelection,imageSignatureMatches,MEDIA_MAX_BYTES} from "../src/lib/media-policy";
 import {canAppearInPublicCatalog,publicProductWhere} from "../src/lib/product-visibility";
 import assert from "node:assert/strict";
 import {money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock,checkPublishEligibility} from "../src/lib/catalog-validation";
@@ -80,4 +80,17 @@ test("media preflight rejects oversized, invalid or non-image files",()=>{
  assert.match(inspectMediaCandidate({...base,type:"application/pdf"})??"",/JPEG/);
  assert.equal(inspectMediaSelection(Array.from({length:9},()=>base)).length,1);
  assert.deepEqual(inspectMediaSelection([base]),[]);
+});
+
+test("Cloudflare R2 upload verification identifies real photo signatures",()=>{
+ const bytes=(...n:number[])=>new Uint8Array(n);
+ assert.equal(imageSignatureMatches("image/jpeg",bytes(255,216,255,224)),true);
+ assert.equal(imageSignatureMatches("image/jpeg",bytes(255,217,255)),false);
+ assert.equal(imageSignatureMatches("image/png",bytes(137,80,78,71,13,10,26,10)),true);
+ assert.equal(imageSignatureMatches("image/png",bytes(137,80,78,71,10,10,26,10)),false);
+ assert.equal(imageSignatureMatches("image/webp",new TextEncoder().encode("RIFFxxxxWEBPfoo")),true);
+ assert.equal(imageSignatureMatches("image/webp",new TextEncoder().encode("RIFFxxxxGIF8foo")),false);
+ assert.equal(imageSignatureMatches("image/avif",new TextEncoder().encode("xxxxftypavif")),true);
+ assert.equal(imageSignatureMatches("image/avif",new TextEncoder().encode("xxxxftypmp42")),false);
+ assert.equal(imageSignatureMatches("image/svg+xml",new TextEncoder().encode("<svg>")),false);
 });
