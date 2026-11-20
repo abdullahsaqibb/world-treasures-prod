@@ -48,7 +48,7 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
    <p className="wt-lede">Save product photos in display order. Use HTTPS links, existing product paths, or the Cloudinary uploader when configured.</p>
    <label className="wt-field">Main product image<small>Image preview updates automatically on the right</small><input name="image" maxLength={1200} value={image} onChange={e=>{setImage(e.target.value);setImageFailed(false);}} placeholder="/products/takis.webp or https://…"/></label>
    <label className="wt-field">Additional gallery images (one URL per line)<small>Up to 7 additional photos. The main image appears first in the storefront gallery.</small><textarea name="galleryUrls" rows={4} maxLength={7800} value={gallery} onChange={e=>setGallery(e.target.value)} placeholder={"https://example.com/front.webp\\nhttps://example.com/back.webp"}/></label>
-   <CloudinaryUploader onUploaded={url=>{if(!image){setImage(url);setImageFailed(false)}else{setGallery(current=>[...new Set([...current.split("\\n").filter(Boolean),url])].join("\\n"))}}}/>
+   <CloudinaryUploader onUploaded={url=>{if(!image){setImage(url);setImageFailed(false)}else{setGallery(current=>[...new Set([...current.split("\n").map(u=>u.trim()).filter(Boolean),url])].join("\n"))}}}/>
    <div className="wt-help">Upload uses Cloudinary in this development preview. New images are only linked to your product after you save the product form.</div>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">STEP 04 / QUALITY CONTROL</span><h2>Review the listing</h2></div></div>
