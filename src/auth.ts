@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { isAuthorizedAdminId } from "@/lib/admin-config";
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [GitHub({ issuer: "https://github.com/login/oauth" })],
+  providers: [GitHub],
   session: { strategy: "jwt" },
   callbacks: {
     async signIn({ account, profile }) { return account?.provider === "github" && !!profile && isAuthorizedAdminId(String(profile.id)); },
