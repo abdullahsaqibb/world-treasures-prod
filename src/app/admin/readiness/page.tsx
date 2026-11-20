@@ -7,7 +7,7 @@ type Check={label:string;ok:boolean;detail:string;critical?:boolean};
 export default async function Readiness(){
  await ensureAdminPage();
  const cfg=adminConfiguration();
- let schema=false,dbError=false,products=0,verified=0,active=0,cities=0,orders=0,mailConfigured=false;
+ let schema=false,dbError=false,products=0,verified=0,active=0,cities=0,orders=0,mailConfigured=false,rateLimitTable=false;
  try {
   const [p,v,a,c,o]=await Promise.all([
    db.product.count(),
@@ -17,12 +17,14 @@ export default async function Readiness(){
    db.order.count()
   ]);
   schema=true;products=p;verified=v;active=a;cities=c;orders=o;
+  try{await db.adminLoginAttempt.count();rateLimitTable=true;}catch{rateLimitTable=false;}
  }catch{dbError=true}
  // These status bits intentionally reveal no environment variable values or credentials.
  mailConfigured=Boolean(process.env.TRANSACTIONAL_EMAIL_API_KEY);
  const checks:Check[]=[
   {label:"Owner administration login",ok:cfg.sessionSecret&&(Boolean(process.env.ADMIN_LOGIN_EMAIL&&process.env.ADMIN_PASSWORD_SCRYPT)||(cfg.oauth&&cfg.allowlist)),detail:"Preview owner password login or approved GitHub fallback with a session secret",critical:true},
-  {label:"Login attack prevention",ok:false,detail:"Persistent account/IP throttling and MFA must be added before exposing a public admin domain",critical:true},
+  {label:"Owner login throttling",ok:rateLimitTable,detail:rateLimitTable?"Shared database-backed attempts table is available; live abuse tests remain pending":"Login-attempt table or database is unavailable",critical:true},
+  {label:"Owner authenticator MFA",ok:Boolean(process.env.ADMIN_TOTP_SECRET),detail:process.env.ADMIN_TOTP_SECRET?"Authenticator secret configured; real app enrollment still needs verification":"No authenticator secret configured. Required before production owner credentials.",critical:true},
   {label:"Database connection",ok:cfg.database&&schema,detail:dbError?"Database connection or schema could not be verified":"Required catalog, order and delivery tables are queryable",critical:true},
   {label:"Migration connection",ok:cfg.directDatabase,detail:"Direct database URL available for reviewed migrations"},
   {label:"Verified products",ok:verified>0,detail:verified+" of "+products+" products checked against supplier details",critical:true},
