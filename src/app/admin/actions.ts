@@ -1,5 +1,20 @@
 "use server";
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
+
+/** Guard stock against concurrent reservations inside the SQL UPDATE itself.
+ * A failed write aborts the enclosing transaction so price/catalog changes roll back too.
+ */
+async function updateInventoryWithoutDroppingReservations(tx:Prisma.TransactionClient,variantId:string,onHand:number){
+ const updated=await tx.inventory.updateMany({
+  where:{variantId,reserved:{lte:onHand}},
+  data:{onHand}
+ });
+ if(updated.count===1)return;
+ const current=await tx.inventory.findUnique({where:{variantId},select:{reserved:true}});
+ if(current)throw new Error("Stock cannot be lower than reserved units");
+ await tx.inventory.create({data:{variantId,onHand,reserved:0}});
+}
 import { requireAdmin } from "@/auth";
 import { revalidatePath } from "next/cache";
 
@@ -18,11 +33,9 @@ export async function saveProduct(form:FormData){
  if(stock<(variant.inventory?.reserved??0))throw new Error("Stock cannot be lower than units reserved for orders");
  await db.$transaction(async tx=>{
   // Check again within the transaction to avoid silently reducing stock beneath reservations.
-  const current=await tx.inventory.findUnique({where:{variantId:variant.id},select:{reserved:true}});
-  if(current&&stock<current.reserved)throw new Error("Stock cannot be lower than reserved units");
   await tx.product.update({where:{id:productId},data:{name}});
   await tx.productVariant.update({where:{id:variant.id},data:{priceCents}});
-  await tx.inventory.upsert({where:{variantId:variant.id},create:{variantId:variant.id,onHand:stock,reserved:0},update:{onHand:stock}});
+  await updateInventoryWithoutDroppingReservations(tx,variant.id,stock);
  });
  revalidatePath("/admin/products");
 }
@@ -107,11 +120,9 @@ export async function updateCatalogProduct(form:FormData){
  if(stock<(variant.inventory?.reserved??0))throw new Error("Stock cannot be lower than quantity already reserved");
  if(!await db.category.findUnique({where:{id:categoryId}}))throw new Error("Choose a valid category");
  await db.$transaction(async tx=>{
-  const current=await tx.inventory.findUnique({where:{variantId:variant.id},select:{reserved:true}});
-  if(current&&stock<current.reserved)throw new Error("Stock cannot be lower than reserved units");
   await tx.product.update({where:{id},data:{name,slug,description,categoryId,status,verified}});
   await tx.productVariant.update({where:{id:variant.id},data:{sku,priceCents,weightGrams}});
-  await tx.inventory.upsert({where:{variantId:variant.id},create:{variantId:variant.id,onHand:stock,reserved:0},update:{onHand:stock}});
+  await updateInventoryWithoutDroppingReservations(tx,variant.id,stock);
   const prior=existing.images[0];
   if(image&&prior)await tx.productImage.update({where:{id:prior.id},data:{url:image,alt:name}});
   else if(image)await tx.productImage.create({data:{productId:id,url:image,alt:name}});
