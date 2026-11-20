@@ -107,6 +107,7 @@ export async function updateCatalogProduct(form:FormData){
  const stock=qty(form.get("stock"));
  const description=optionalText(form.get("description"),3000);
  const image=imagePath(optionalText(form.get("image"),1200));
+ const gallery=galleryFromForm(form);
  const weight=optionalText(form.get("weightGrams"),12);
  const weightGrams=weight?qty(weight):null;
  const sku=clean(form.get("sku"),100).toUpperCase();
