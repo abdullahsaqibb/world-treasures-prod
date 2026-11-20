@@ -75,7 +75,7 @@ export const {handlers,auth,signIn,signOut}=NextAuth({
 });
 export function isAdminSession(session:Session|null){
  const id=session?.user?.id;
- return Boolean(id&&(id===LOCAL_ID?localEnabled():isAuthorizedAdminId(id)));
+ return Boolean(id&&(id===LOCAL_ID?localEnabled():((process.env.VERCEL_ENV!=="production"||process.env.ADMIN_GITHUB_PRODUCTION_ENABLED==="true")&&isAuthorizedAdminId(id))));
 }
 export async function requireAdmin(){
  const session=await auth();
