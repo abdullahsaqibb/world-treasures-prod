@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 import {createCatalogProductState,updateCatalogProductState,type CatalogFormState} from "../actions";
 import {PendingSubmit} from "../PendingSubmit";
 type CategoryOption={id:string;name:string};
-type ProductData={id:string;name:string;slug:string;description:string|null;verified:boolean;status:"DRAFT"|"ACTIVE"|"ARCHIVED";categoryId:string;image:string;sku:string;priceCents:number;stock:number;reserved:number;weightGrams:number|null};
+type ProductData={id:string;name:string;slug:string;description:string|null;verified:boolean;status:"DRAFT"|"ACTIVE"|"ARCHIVED";categoryId:string;image:string;gallery:string[];sku:string;priceCents:number;stock:number;reserved:number;weightGrams:number|null};
 export default function ProductEditor({categories,product}:{categories:CategoryOption[],product?:ProductData}){
  const editing=Boolean(product);
  const router=useRouter();
@@ -15,13 +15,14 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
  const [name,setName]=useState(product?.name??"");
  const [image,setImage]=useState(product?.image??"");
  const [imageFailed,setImageFailed]=useState(false);
+ const [gallery,setGallery]=useState((product?.gallery??[]).filter(u=>u!==product?.image).join("\n"));
  const [categoryId,setCategoryId]=useState(product?.categoryId??"");
  const [price,setPrice]=useState(product?(product.priceCents/100).toFixed(2):"");
  const [stock,setStock]=useState(String(product?.stock??0));
  const selectedCategory=categories.find(x=>x.id===categoryId)?.name||"Choose a category";
  const imageAllowed=image.startsWith("/")&&!image.startsWith("//")||/^https:\/\/[^\s]+$/i.test(image);
  return <div>
- <div className="wt-head"><div><span className="wt-eyebrow">MERCHANDISE / {editing?"EDIT PRODUCT":"NEW PRODUCT"}</span><h1>{editing?"Refine the listing.":"Add something good."}</h1><p className="wt-lede">Everything your customers need to know, all in one guided form. No coding required.</p><div className="wt-product-topline"><span className="wt-badge amber">Draft catalog</span>{product?.verified?<span className="wt-badge green">Information verified</span>:<span className="wt-badge">Pending review</span>}</div></div><Link className="wt-btn light" href="/admin/products">← Back to products</Link></div>
+ <div className="wt-head"><div><span className="wt-eyebrow">MERCHANDISE / {editing?"EDIT PRODUCT":"NEW PRODUCT"}</span><h1>{editing?"Refine the listing.":"Add something good."}</h1><p className="wt-lede">Everything your customers need to know, all in one guided form. No coding required.</p><div className="wt-product-topline"><span className="wt-badge amber">{product?.status==="ACTIVE"?"Published catalog":product?.status==="ARCHIVED"?"Archived catalog":"Draft catalog"}</span>{product?.verified?<span className="wt-badge green">Information verified</span>:<span className="wt-badge">Pending review</span>}</div></div><Link className="wt-btn light" href="/admin/products">← Back to products</Link></div>
  <form action={submitAction} className="wt-stack">
  {product&&<input type="hidden" name="productId" value={product.id}/>}
  <div className="wt-product-editor-grid">
@@ -43,14 +44,16 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
    </div>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">STEP 03 / PHOTOGRAPHY</span><h2>Make it look irresistible</h2></div><span className="wt-badge">Image</span></div>
-   <p className="wt-lede">For now, add a secure image URL or an existing product image path. A proper upload library is the next backend feature.</p>
+   <p className="wt-lede">Save product photos in display order. Use existing image paths or HTTPS links. Direct uploads require secure media storage and are not enabled yet.</p>
    <label className="wt-field">Main product image<small>Image preview updates automatically on the right</small><input name="image" maxLength={1200} value={image} onChange={e=>{setImage(e.target.value);setImageFailed(false);}} placeholder="/products/takis.webp or https://…"/></label>
+   <label className="wt-field">Additional gallery images (one URL per line)<small>Up to 7 additional photos. The main image appears first in the storefront gallery.</small><textarea name="galleryUrls" rows={4} maxLength={7800} value={gallery} onChange={e=>setGallery(e.target.value)} placeholder={"https://example.com/front.webp\\nhttps://example.com/back.webp"}/></label>
+   <div className="wt-help">Direct file uploads will be enabled after secure image storage is connected. Existing URL-based galleries can be managed now.</div>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">STEP 04 / QUALITY CONTROL</span><h2>Review the listing</h2></div></div>
-   <p className="wt-help">Saving here does not publish to the live store. The development catalog and production storefront are separate while checkout and product verification are unfinished.</p>
+   <p className="wt-help">Publishing requires verified packaging, a description, real pricing and at least one image. Published products appear in the development storefront catalog; payments remain disabled.</p>
    {editing?<div className="wt-formgrid">
-    <label className="wt-field">Catalog status<select name="status" defaultValue={product?.status==="ARCHIVED"?"ARCHIVED":"DRAFT"}><option value="DRAFT">Draft — keep this listing</option><option value="ARCHIVED">Archived — hide in catalog</option></select></label>
-    <div className="wt-field"><span>Supplier / package verification</span><label className="wt-check"><input type="checkbox" name="verified" defaultChecked={product?.verified}/> I checked the information against the actual item.</label><small>Does not publish the product.</small></div>
+    <label className="wt-field">Catalog status<select name="status" defaultValue={product?.status??"DRAFT"}><option value="DRAFT">Draft — private listing</option><option value="ACTIVE">Published — visible in verified catalog</option><option value="ARCHIVED">Archived — hide in catalog</option></select></label>
+    <div className="wt-field"><span>Supplier / package verification</span><label className="wt-check"><input type="checkbox" name="verified" defaultChecked={product?.verified}/> I checked the information against the actual item.</label><small>Required before selecting Published. Only check this after verifying product information.</small></div>
    </div>:<p className="wt-muted">New products start as drafts. You can return to verify them after saving.</p>}
   </section>
  </div>
