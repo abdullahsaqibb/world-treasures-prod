@@ -41,3 +41,20 @@ export function checkAvailableStock(onHand:number,reserved:number):void{
   throw new Error("Stock cannot be lower than reserved units");
  }
 }
+
+/** Only reviewed inventory may be published to the public database-backed catalogue. */
+export function checkPublishEligibility(product:{
+ verified:boolean;name:string;description:string|null;images:string[];
+ variants:Array<{sku:string;priceCents:number;onHand:number;reserved:number}>;
+}):void{
+ if(!product.verified)throw new Error("Verify the product against its actual packaging before publishing");
+ if(!product.name.trim())throw new Error("Enter the product name before publishing");
+ if(!product.description?.trim())throw new Error("Add a verified product description before publishing");
+ if(!product.images.some(x=>Boolean(imagePath(x))))throw new Error("Add a product photo before publishing");
+ if(!product.variants.length)throw new Error("Create a product variant before publishing");
+ for(const variant of product.variants){
+  if(!variant.sku.trim())throw new Error("Every variant requires an SKU");
+  if(!Number.isSafeInteger(variant.priceCents)||variant.priceCents<=0)throw new Error("Every published variant needs a verified price greater than zero");
+  checkAvailableStock(variant.onHand,variant.reserved);
+ }
+}
