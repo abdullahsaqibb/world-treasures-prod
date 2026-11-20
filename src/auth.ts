@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth,{type Session} from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import {scryptSync,timingSafeEqual} from "node:crypto";
@@ -65,7 +65,7 @@ export const {handlers,auth,signIn,signOut}=NextAuth({
  },
  pages:{signIn:"/admin/login"}
 });
-export function isAdminSession(session:Awaited<ReturnType<typeof auth>>){
+export function isAdminSession(session:Session|null){
  const id=session?.user?.id;
  return Boolean(id&&(id===LOCAL_ID?localEnabled():isAuthorizedAdminId(id)));
 }
