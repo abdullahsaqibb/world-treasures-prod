@@ -23,6 +23,7 @@ export async function GET(){
 }
 export async function POST(request:NextRequest){
  try{await requireAdmin();}catch{return response({error:"Unauthorized"},401);}
+ try{
  if(!sameOrigin(request))return response({error:"Invalid origin"},403);
  const config=r2Configuration();
  if(!config)return response({error:"R2 storage is not configured for this environment"},503);
