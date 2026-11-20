@@ -1,8 +1,10 @@
 import {signIn} from "@/auth";
+import {adminConfiguration} from "@/lib/admin-config";
 import Link from "next/link";
 export const dynamic="force-dynamic";
 export default function Login(){
- const configured=Boolean(process.env.AUTH_SECRET&&process.env.AUTH_GITHUB_ID&&process.env.AUTH_GITHUB_SECRET&&process.env.ADMIN_GITHUB_IDS);
+ const cfg=adminConfiguration();
+ const configured=cfg.oauth&&cfg.sessionSecret&&cfg.allowlist;
  return <div className="wt-admin-login">
   <div className="wt-login-showcase"><div className="wt-login-brand"><span className="wt-login-logo">W<span>T</span></span><div><strong>WORLD TREASURES</strong><small>Merchant Studio</small></div></div>
    <div className="wt-login-art"><div className="wt-login-ring"/><span className="wt-login-spark spark-a">✳</span><span className="wt-login-spark spark-b">✳</span><span className="wt-login-block block-a">SELL</span><span className="wt-login-block block-b">CREATE</span><span className="wt-login-block block-c">GROW</span></div>
