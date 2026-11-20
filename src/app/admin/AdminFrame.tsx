@@ -16,7 +16,7 @@ export function AdminIcon({name,size=18}:{name:string;size?:number}){return <svg
 function NavContent({pathname,onSelect}:{pathname:string;onSelect?:()=>void}){
  return <>{nav.map(section=><section className="wt-nav-group" key={section.heading}><h3>{section.heading}</h3><div className="wt-nav-group-links">{section.items.map(item=>{
  const active=pathname===item.href||(item.href!=="/admin"&&pathname.startsWith(item.href+"/"));
- return <Link onClick={onSelect} key={item.href} href={item.href} className={"wt-nav-link"+(active?" is-active":"")} aria-current={active?"page":undefined}><AdminIcon name={item.icon}/><span>{item.label}</span>{item.planned&&<small>soon</small>}</Link>;
+ return item.planned?<span key={item.href} className="wt-nav-link wt-nav-planned" aria-disabled="true" title={item.label+" is not available yet"}><AdminIcon name={item.icon}/><span>{item.label}</span><small>soon</small></span>:<Link onClick={onSelect} key={item.href} href={item.href} className={"wt-nav-link"+(active?" is-active":"")} aria-current={active?"page":undefined}><AdminIcon name={item.icon}/><span>{item.label}</span></Link>;
  })}</div></section>)}</>;
 }
 export function AdminFrame({children,email}:{children:React.ReactNode;email?:string|null}){
