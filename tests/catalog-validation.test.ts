@@ -1,4 +1,5 @@
 import test from "node:test";
+import {inspectMediaCandidate,inspectMediaSelection,MEDIA_MAX_BYTES} from "../src/lib/media-policy";
 import {canAppearInPublicCatalog,publicProductWhere} from "../src/lib/product-visibility";
 import assert from "node:assert/strict";
 import {money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock,checkPublishEligibility} from "../src/lib/catalog-validation";
@@ -61,4 +62,22 @@ test("public catalog never displays drafts, archives or unverified records",()=>
  assert.equal(canAppearInPublicCatalog({status:"ACTIVE",verified:false}),false);
  assert.equal(canAppearInPublicCatalog({status:"DRAFT",verified:true}),false);
  assert.equal(canAppearInPublicCatalog({status:"ARCHIVED",verified:true}),false);
+});
+
+test("media preflight permits real image types with safe filenames",()=>{
+ const base={name:"pack-front.webp",size:524288,type:"image/webp"};
+ assert.equal(inspectMediaCandidate(base),null);
+ assert.equal(inspectMediaCandidate({...base,type:"image/jpeg",name:"front.jpg"}),null);
+ assert.equal(inspectMediaCandidate({...base,type:"image/png",name:"back.png"}),null);
+ assert.equal(inspectMediaCandidate({...base,type:"image/avif",name:"front.avif"}),null);
+});
+test("media preflight rejects oversized, invalid or non-image files",()=>{
+ const base={name:"photo.webp",size:1000,type:"image/webp"};
+ assert.match(inspectMediaCandidate({...base,size:MEDIA_MAX_BYTES+1})??"",/8 MB/);
+ assert.match(inspectMediaCandidate({...base,size:0})??"",/empty/);
+ assert.match(inspectMediaCandidate({...base,name:"../fake.png"})??"",/file name/);
+ assert.match(inspectMediaCandidate({...base,type:"image/svg+xml"})??"",/JPEG/);
+ assert.match(inspectMediaCandidate({...base,type:"application/pdf"})??"",/JPEG/);
+ assert.equal(inspectMediaSelection(Array.from({length:9},()=>base)).length,1);
+ assert.deepEqual(inspectMediaSelection([base]),[]);
 });
