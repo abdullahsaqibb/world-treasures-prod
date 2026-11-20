@@ -1,7 +1,28 @@
-
-/* 26 — Account and Payfast screens: local, in-memory demonstrations only. */
-$('#accountDialog .account-art').innerHTML=[products[0],products[3],products[7]].map(pack).join('');
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-account'))$('#accountDialog').showModal();if(b.id==='cancelPayfast'){checkoutStep=2;renderCheckout()}if(b.id==='simulatePayfast'){b.disabled=true;b.textContent='Confirming demo payment…';setTimeout(()=>{checkoutData.total=subtotal()+fee();checkoutData.order='WT-DEMO-'+Math.random().toString(36).slice(2,7).toUpperCase();checkoutData.payment='card';cart={};updateCart();checkoutStep=4;renderCheckout();$('#checkoutDialog').scrollTop=0},reduced?0:650)}});
-$('#accountForm').addEventListener('submit',e=>{e.preventDefault();if(!e.target.reportValidity())return;const email=new FormData(e.target).get('accountEmail');$('#accountContent').innerHTML=`<p class="eyebrow">DEMO SIGN-IN</p><h2>Check your inbox.</h2><p>In the live store, a sign-in link would be sent to <strong>${esc(email)}</strong>.</p><div class="notice">No email has been sent. This screen demonstrates passwordless sign-in.</div><button class="button full" data-close="accountDialog">Back to shopping →</button>`});
-// One small surprise: an elastic nudge on the collection filter, with no permanent loop.
-if(hasGSAP&&!reduced)$('#heroFilters').addEventListener('click',e=>{const b=e.target.closest('button');if(b)gsap.fromTo(b,{rotation:-3,scale:.94},{rotation:0,scale:1,duration:.5,ease:'elastic.out(1,.5)',clearProps:'transform'})});
+/* Legacy account demo safety gate. No email, payment or order is created. */
+(function(){
+ "use strict";
+ const account=document.getElementById("accountDialog");
+ const form=document.getElementById("accountForm");
+ document.addEventListener("click",event=>{
+  const button=event.target instanceof Element?event.target.closest("button"):null;
+  if(!button)return;
+  if(button.hasAttribute("data-account")){event.preventDefault();if(account&&!account.open)account.showModal();}
+  if(button.id==="simulatePayfast"){
+   event.preventDefault();event.stopImmediatePropagation();
+   button.disabled=true;button.textContent="Payments are not available yet";
+  }
+ },true);
+ if(form)form.addEventListener("submit",event=>{
+  event.preventDefault();
+  if(!form.reportValidity())return;
+  const box=document.getElementById("accountContent");
+  if(!box)return;
+  const title=document.createElement("h2");
+  title.textContent="Customer accounts coming later";
+  const message=document.createElement("p");
+  message.textContent="This is a preview. No email was sent and no account was created. Guest checkout is available for delivery review.";
+  box.replaceChildren(title,message);
+ });
+ const demoPay=document.getElementById("simulatePayfast");
+ if(demoPay){demoPay.disabled=true;demoPay.textContent="Payments unavailable";}
+})();
