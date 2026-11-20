@@ -15,9 +15,19 @@ async function updateInventoryWithoutDroppingReservations(tx:Prisma.TransactionC
  if(current)throw new Error("Stock cannot be lower than reserved units");
  await tx.inventory.create({data:{variantId,onHand,reserved:0}});
 }
+
+/** Preserve the primary image and its ordered gallery. All URLs must be HTTPS or local paths. */
+function galleryFromForm(form:FormData):string[]{
+ const cover=imagePath(optionalText(form.get("image"),1200));
+ const lines=optionalText(form.get("galleryUrls"),7800).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ if(lines.length>7)throw new Error("Maximum 8 product images including the cover");
+ const urls=[...(cover?[cover]:[]),...lines.map(x=>imagePath(x)!)];
+ return [...new Set(urls)];
+}
+
 import { requireAdmin } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock } from "@/lib/catalog-validation";
+import { money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock,checkPublishEligibility } from "@/lib/catalog-validation";
 
 export async function saveProduct(form:FormData){
  await requireAdmin();
@@ -71,6 +81,7 @@ export async function createCatalogProduct(form:FormData){
  const stock=qty(form.get("stock"));
  const description=optionalText(form.get("description"),3000);
  const image=imagePath(optionalText(form.get("image"),1200));
+ const gallery=galleryFromForm(form);
  const weight=optionalText(form.get("weightGrams"),12);
  const weightGrams=weight?qty(weight):null;
  const category=await db.category.findUnique({where:{id:categoryId}});
@@ -78,7 +89,7 @@ export async function createCatalogProduct(form:FormData){
  const id=crypto.randomUUID();
  await db.$transaction(async tx=>{
   await tx.product.create({data:{id,name,slug,description,categoryId,status:"DRAFT",verified:false}});
-  if(image)await tx.productImage.create({data:{productId:id,url:image,alt:name}});
+  for(let i=0;i<gallery.length;i++)await tx.productImage.create({data:{productId:id,url:gallery[i],alt:name,sortOrder:i}});
   const variant=await tx.productVariant.create({data:{productId:id,sku,label:"Standard",priceCents,weightGrams}});
   await tx.inventory.create({data:{variantId:variant.id,onHand:stock,reserved:0}});
  });
@@ -100,23 +111,36 @@ export async function updateCatalogProduct(form:FormData){
  const weightGrams=weight?qty(weight):null;
  const sku=clean(form.get("sku"),100).toUpperCase();
  if(!/^[A-Z0-9][A-Z0-9._-]*$/.test(sku))throw new Error("SKU may contain letters, numbers, dots, dashes and underscores");
- const status=form.get("status")==="ARCHIVED"?"ARCHIVED":"DRAFT";
+ const status=form.get("status")==="ACTIVE"?"ACTIVE":form.get("status")==="ARCHIVED"?"ARCHIVED":"DRAFT";
  const verified=form.get("verified")==="on";
- const existing=await db.product.findUnique({where:{id},include:{variants:{include:{inventory:true},take:1},images:{orderBy:{sortOrder:"asc"},take:1}}});
+ const existing=await db.product.findUnique({where:{id},include:{variants:{include:{inventory:true},orderBy:{id:"asc"}},images:{orderBy:{sortOrder:"asc"}}}});
  if(!existing?.variants[0])throw new Error("Product not found");
  const variant=existing.variants[0];
  checkAvailableStock(stock,variant.inventory?.reserved??0);
  if(!await db.category.findUnique({where:{id:categoryId}}))throw new Error("Choose a valid category");
+ if(status==="ACTIVE")checkPublishEligibility({
+  verified,name,description,images:gallery,
+  variants:existing.variants.map(v=>({
+   sku:v.id===variant.id?sku:v.sku,
+   priceCents:v.id===variant.id?priceCents:v.priceCents,
+   onHand:v.id===variant.id?stock:v.inventory?.onHand??0,
+   reserved:v.inventory?.reserved??0
+  }))
+ });
  await db.$transaction(async tx=>{
   await tx.product.update({where:{id},data:{name,slug,description,categoryId,status,verified}});
   await tx.productVariant.update({where:{id:variant.id},data:{sku,priceCents,weightGrams}});
   await updateInventoryWithoutDroppingReservations(tx,variant.id,stock);
-  const prior=existing.images[0];
-  if(image&&prior)await tx.productImage.update({where:{id:prior.id},data:{url:image,alt:name}});
-  else if(image)await tx.productImage.create({data:{productId:id,url:image,alt:name}});
-  else if(prior)await tx.productImage.delete({where:{id:prior.id}});
+  // Reuse existing gallery records whenever possible; remove only URLs explicitly removed in the editor.
+  for(let i=0;i<gallery.length;i++){
+   const prior=existing.images.find(x=>x.url===gallery[i]);
+   if(prior)await tx.productImage.update({where:{id:prior.id},data:{sortOrder:i,alt:name}});
+   else await tx.productImage.create({data:{productId:id,url:gallery[i],alt:name,sortOrder:i}});
+  }
+  const unwanted=existing.images.filter(x=>!gallery.includes(x.url)).map(x=>x.id);
+  if(unwanted.length)await tx.productImage.deleteMany({where:{id:{in:unwanted},productId:id}});
  });
- revalidatePath("/admin");revalidatePath("/admin/products");revalidatePath("/admin/products/"+encodeURIComponent(id));
+ revalidatePath("/admin");revalidatePath("/admin/products");revalidatePath("/admin/products/"+encodeURIComponent(id));revalidatePath("/catalog");revalidatePath("/catalog/"+encodeURIComponent(slug));revalidatePath("/");
 }
 
 export async function createCategory(form:FormData){
