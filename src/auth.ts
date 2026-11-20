@@ -3,6 +3,7 @@ import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import {scryptSync,timingSafeEqual} from "node:crypto";
 import {isAuthorizedAdminId} from "@/lib/admin-config";
+import {allowOwnerSignIn,clearOwnerSignInFailures} from "@/lib/admin-login-limit";
 
 const LOCAL_ID="world-treasures-local-owner";
 function localEnabled(){
@@ -26,15 +27,18 @@ export const {handlers,auth,signIn,signOut}=NextAuth({
    id:"credentials",
    name:"Owner email and password",
    credentials:{email:{label:"Email",type:"email"},password:{label:"Password",type:"password"}},
-   async authorize(input){
+   async authorize(input,request){
     if(!localEnabled())return null;
     const email=String(input?.email??"").trim().toLowerCase();
     const password=String(input?.password??"");
     if(email.length>254||password.length>1024||password.length<16)return null;
     const owner=process.env.ADMIN_LOGIN_EMAIL!.trim().toLowerCase();
-    // Run the password KDF for any normal-length candidate even when the email is wrong.
+    // Global account and IP counters persist across Vercel instances and deployments.
+    // Do not reveal whether the email or password is wrong or the account is throttled.
+    if(!await allowOwnerSignIn(email,request))return null;
     const passwordOk=checkPassword(password);
     if(email!==owner||!passwordOk)return null;
+    await clearOwnerSignInFailures(email,request);
     return {id:LOCAL_ID,email:owner,name:"World Treasures Owner"};
    }
   })
