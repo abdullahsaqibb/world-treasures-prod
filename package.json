@@ -12,7 +12,7 @@
     "db:deploy": "prisma migrate deploy",
     "seed:prototype": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
-    "test:catalog": "tsx --test tests/catalog-validation.test.ts"
+    "test:catalog": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "next": "^15.5.0",
