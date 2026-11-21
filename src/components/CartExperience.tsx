@@ -18,7 +18,7 @@ function readCart(catalog:Map<string,Product>):Cart {
   return Object.fromEntries(entries);
  }catch{return {};}
 }
-export function CartExperience({products}:{products:Product[]}){
+export function CartExperience({products,recoveredPreview=[]}:{products:Product[];recoveredPreview?:Product[]}){
  const catalog=useMemo(()=>new Map(products.map(p=>[p.id,p])),[products]);
  const [mounted,setMounted]=useState(false);
  const [cart,setCart]=useState<Cart>({});
@@ -46,8 +46,9 @@ export function CartExperience({products}:{products:Product[]}){
  },[catalog]);
  useEffect(()=>{if(mounted)localStorage.setItem("wt-cart-v1",JSON.stringify(cart));},[cart,mounted]);
  const items=useMemo(()=>Object.entries(cart).map(([id,qty])=>({product:catalog.get(id)!,qty:Math.min(qty,catalog.get(id)?.stock??0)})).filter(x=>x.product&&x.qty>0),[cart,catalog]);
- const categories=useMemo(()=>["All",...new Set(products.map(p=>p.category))],[products]);
+ const categories=useMemo(()=>["All",...new Set([...products,...recoveredPreview].map(p=>p.category))],[products,recoveredPreview]);
  const shown=filter==="All"?products:products.filter(p=>p.category===filter);
+ const shownPreview=filter==="All"?recoveredPreview:recoveredPreview.filter(p=>p.category===filter);
  const count=items.reduce((sum,i)=>sum+i.qty,0);
  const total=items.reduce((sum,i)=>sum+i.qty*i.product.priceCents,0);
  useEffect(()=>{
@@ -106,8 +107,15 @@ export function CartExperience({products}:{products:Product[]}){
   <b className="wt-line-price">{zar(p.priceCents*qty)}</b></div>)}</div>;
  const basket=<div className="wt-basket-visual" aria-hidden="true"><div className="wt-basket-packets">{items.slice(0,5).map(({product:p},idx)=><img key={p.id} src={p.image} alt="" style={{transform:`translateX(-50%) rotate(${(idx-(Math.min(items.length,5)-1)/2)*18}deg)`,left:`${50+(idx-(Math.min(items.length,5)-1)/2)*13}%`,animationDelay:`${idx*95}ms`}}/>)}</div><div className="wt-basket-box"><span>WORLD TREASURES</span><small>{count} {count===1?"ITEM":"ITEMS"} COLLECTED</small></div></div>;
  const filters=<div className="wt-cart-filter-set" role="group" aria-label="Filter published products">{categories.map(category=><button key={category} type="button" className={category===filter?"is-active":""} aria-pressed={category===filter} onClick={()=>setFilter(category)}>{category}</button>)}</div>;
- const productsGrid=products.length?<div className="wt-cart-shop-grid">{shown.map(p=><article className="wt-cart-product" key={p.id}>
- <div className="wt-cart-product-image">{p.image?<img src={p.image} alt={p.name}/>:<span>No photo</span>}</div><div className="wt-cart-product-info"><span>{p.category}</span><h3><Link href={"/catalog/"+encodeURIComponent(p.slug)}>{p.name}</Link></h3><p>{zar(p.priceCents)}</p><small>{p.stock>0?p.stock+" available":"Out of stock"}</small><button type="button" disabled={p.stock===0} onClick={()=>add(p)}>{p.stock>0?"＋ Add to bag":"Currently unavailable"}</button></div></article>)}</div>:<div className="wt-cart-empty-catalog"><h3>Our verified collection is being prepared.</h3><p>Products will appear here as soon as their information, pricing and photos have been approved.</p><Link href="/catalog">View verified collection →</Link></div>;
+ const verifiedGrid=shown.length?<div className="wt-cart-shop-grid">{shown.map(p=><article className="wt-cart-product" key={p.id}>
+ <div className="wt-cart-product-image">{p.image?<img src={p.image} alt={p.name}/>:<span>No photo</span>}</div><div className="wt-cart-product-info"><span>{p.category}</span><h3><Link href={"/catalog/"+encodeURIComponent(p.slug)}>{p.name}</Link></h3><p>{zar(p.priceCents)}</p><small>{p.stock>0?p.stock+" available":"Out of stock"}</small><button type="button" disabled={p.stock===0} onClick={()=>add(p)}>{p.stock>0?"＋ Add to bag":"Currently unavailable"}</button></div></article>)}</div>:null;
+ const previewGrid=shownPreview.length?<section className="wt-recovered-showcase" aria-label="Original World Treasures product showcase">
+ <div className="wt-recovered-heading"><h3>Discover our original range</h3><p>These 15 original World Treasures products are being reviewed. Images and names are for catalogue preview; prices, inventory and availability are not yet confirmed. Online purchasing is disabled.</p></div>
+ <div className="wt-cart-shop-grid">{shownPreview.map(p=><article className="wt-cart-product" key={p.id}>
+  <div className="wt-cart-product-image">{p.image?<img src={p.image} alt={p.name} loading="lazy"/>:<span>Product image pending</span>}</div>
+  <div className="wt-cart-product-info"><span>{p.category} · Catalogue preview</span><h3>{p.name}</h3><p>Price to be confirmed</p><small>Awaiting product verification</small><button type="button" disabled>Not yet available</button></div>
+ </article>)}</div></section>:null;
+ const productsGrid=<div className="wt-catalog-sections">{verifiedGrid}{previewGrid}{!verifiedGrid&&!previewGrid&&<div className="wt-cart-empty-catalog"><h3>Our verified collection is being prepared.</h3><p>Products will appear here as soon as their information, pricing and photos have been approved.</p><Link href="/catalog">View verified collection →</Link></div>}</div>;
  const basketDetails=<div className="wt-cart-popup-shade" onClick={()=>setExpanded(false)} role="presentation"><section className="wt-cart-popup" role="dialog" aria-modal="true" aria-label="Products inside your basket" onClick={e=>e.stopPropagation()}><div className="wt-cart-popup-head"><div><strong>Inside your basket</strong><span>{count} {count===1?"item":"items"} selected</span></div><button type="button" aria-label="Close basket details" onClick={()=>setExpanded(false)}>×</button></div>{itemList(false)}<div className="wt-cart-total"><span>Products subtotal</span><strong>{zar(total)}</strong></div><button className="wt-cart-primary" onClick={()=>setExpanded(false)}>Back to your bag</button></section></div>;
  const bagContents=<div className="wt-cart-panel wt-cart-page">
  {items.length? <><div className="cart-page-layout">
