@@ -32,11 +32,12 @@ function render(node: SourceNode, key: number | string, overrides: Partial<Recor
   if (typeof node === "string") {
     // Keep original prototype composition, without claiming fictional discounts.
     if(section==="mixBox"||section==="bundles"){
-      return node.replace(/SAVE R\\d+(?:\\.\\d+)?/g,"COMING SOON")
-        .replace(/DEMO SAVING \\/ R\\d+(?:\\.\\d+)?/g,"BUNDLE PRICING PENDING")
-        .replace(/R\\d+(?:\\.\\d+)?/g,"PRICE PENDING")
-        .replace(/3 OF 3 SELECTED/g,"BUILD YOUR BOX SOON")
-        .replace(/Add three-pack to bag/g,"Bundle builder coming soon");
+      return node.replaceAll("SAVE R25.","COMING SOON").replaceAll("SAVE R30.00","COMING SOON")
+        .replaceAll("DEMO SAVING / R25.00","BUNDLE PRICING PENDING")
+        .replaceAll("R139.70","PRICE PENDING").replaceAll("R109.70","PRICE PENDING")
+        .replaceAll("R144.70","PRICE PENDING").replaceAll("R119.70","PRICE PENDING")
+        .replaceAll("3 OF 3 SELECTED","BUILD YOUR BOX SOON")
+        .replaceAll("Add three-pack to bag","Bundle builder coming soon");
     }
     return node;
   }
