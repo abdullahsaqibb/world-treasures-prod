@@ -72,3 +72,14 @@
 .wt-checkout-guest [role="alert"]{color:#9e3429;font-size:12px}
 @media(max-width:650px){.wt-cart-filter-set{gap:6px}.wt-cart-filter-set button{padding:9px 12px}.wt-cart-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.wt-cart-product-image{height:145px}.wt-cart-product-image img{height:125px;width:100%}.wt-cart-product-info{padding:11px}.wt-cart-product-info h3{font-size:14px}.wt-cart-product-info p{font-size:15px}.wt-cart-product-info button{font-size:11px;padding:10px 5px}}
 @media(prefers-reduced-motion:reduce){.wt-cart-product-image img{transition:none}}
+
+
+/* Restored 15-item browse-only showcase, rendered from editable Neon records. */
+#productGrid:has(>.wt-catalog-sections){display:block!important;width:100%}
+#productGrid>.wt-catalog-sections{width:100%;grid-column:1/-1}
+.wt-catalog-sections{display:grid;gap:28px}
+.wt-recovered-showcase{width:100%}
+.wt-recovered-heading{margin:0 0 18px;padding:16px 18px;border:1px solid #eadcc9;border-radius:12px;background:#fff9ed}
+.wt-recovered-heading h3{font-size:clamp(1.2rem,2vw,1.7rem);margin:0 0 7px;color:#172a45}
+.wt-recovered-heading p{margin:0;color:#755b43;line-height:1.6;font-size:14px}
+.wt-recovered-showcase .wt-cart-product-info button:disabled{opacity:.8;cursor:not-allowed}
