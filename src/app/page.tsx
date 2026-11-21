@@ -23,5 +23,5 @@ export default async function Home() {
  }catch{
   // On a branch whose database has not been migrated yet, render the approved content unchanged.
  }
- return <><div className="wt-public-launch-note" role="note"><strong>World Treasures catalogue preview</strong><span>Product prices and information are being verified. Online orders and payments are not yet enabled.</span><a href="/catalog" style={{color:"#ffd5b2",fontWeight:800,textDecoration:"underline"}}>View verified collection →</a></div><ApprovedRegions overrides={overrides} products={shopProducts}/><StorefrontHero products={shopProducts} recoveredPreview={recoveredPreview}/><LegacyRuntime /><CartExperience products={shopProducts} recoveredPreview={recoveredPreview}/></>;
+ return <><div className="wt-public-launch-note" role="note"><strong>World Treasures catalogue preview</strong><span>Browse our verified international snacks and drinks. Online orders and payments are not yet enabled.</span><a href="/catalog" style={{color:"#ffd5b2",fontWeight:800,textDecoration:"underline"}}>View verified collection →</a></div><ApprovedRegions overrides={overrides} products={shopProducts}/><StorefrontHero products={shopProducts} recoveredPreview={recoveredPreview}/><LegacyRuntime /><CartExperience products={shopProducts} recoveredPreview={recoveredPreview}/></>;
 }
