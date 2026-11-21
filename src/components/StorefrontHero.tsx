@@ -12,13 +12,13 @@ const previewShowcase:StorefrontItem[]=[
 ];
 
 /** Enhance the approved hero DOM instead of replacing its original layout. */
-export function StorefrontHero({products}:{products:StorefrontItem[]}){
+export function StorefrontHero({products,recoveredPreview=[]}:{products:StorefrontItem[];recoveredPreview?:StorefrontItem[]}){
  const isPreviewShowcase=products.length===0;
  const featured=useMemo(()=>{
   const seen=new Set<string>();
   const verified=products.filter(product=>{if(!product.image||seen.has(product.slug))return false;seen.add(product.slug);return true}).slice(0,5);
-  return verified.length?verified:previewShowcase;
- },[products]);
+  return verified.length?verified:(recoveredPreview.filter(product=>Boolean(product.image)).slice(0,5).length?recoveredPreview.filter(product=>Boolean(product.image)).slice(0,5):previewShowcase);
+ },[products,recoveredPreview]);
  const [mounted,setMounted]=useState(false);
  const [active,setActive]=useState(0);
  const [paused,setPaused]=useState(false);
@@ -37,7 +37,7 @@ export function StorefrontHero({products}:{products:StorefrontItem[]}){
   update("stageWord",item.category.toUpperCase());
   update("stageName",item.name);
   update("stageOrigin",isPreviewShowcase?"WORLD TREASURES / ILLUSTRATIVE PREVIEW":"WORLD TREASURES / VERIFIED RANGE");
-  update("stagePrice",isPreviewShowcase?"CATALOGUE COMING SOON":new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR"}).format(item.priceCents/100));
+  update("stagePrice",isPreviewShowcase?"PRICE TO BE CONFIRMED":new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR"}).format(item.priceCents/100));
   update("stageCounter",String(active+1).padStart(2,"0")+" / "+String(featured.length).padStart(2,"0"));
   const change=(delta:number)=>setActive(i=>(i+delta+featured.length)%featured.length);
   const prev=document.getElementById("heroPrev"),next=document.getElementById("heroNext"),pause=document.getElementById("heroPause"),shop=document.getElementById("stageShop");
