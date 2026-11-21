@@ -1,5 +1,6 @@
 import React, { createElement, Fragment } from "react";
 import source from "@/data/approved-markup.json";
+import {copyFields,StoreCopyKey} from "@/lib/storefront-copy";
 
 type SourceNode = string | { tag: string; attrs: Record<string, string>; children: SourceNode[] };
 const nodes = source as SourceNode[];
@@ -27,7 +28,7 @@ const aliases: Record<string,string> = {
 };
 const flags = new Set(["disabled", "checked", "selected", "multiple", "hidden", "required", "open", "controls", "loop", "muted", "autoplay"]);
 const voidTags = new Set(["img", "input", "br", "hr", "meta", "link", "source", "area", "col", "embed", "wbr"]);
-function render(node: SourceNode, key: number | string): React.ReactNode {
+function render(node: SourceNode, key: number | string, overrides: Partial<Record<StoreCopyKey,string>>): React.ReactNode {
   if (typeof node === "string") return node;
   const props: Record<string, unknown> = { key };
   for (const [name, value] of Object.entries(node.attrs)) {
@@ -37,8 +38,11 @@ function render(node: SourceNode, key: number | string): React.ReactNode {
     props[aliases[name] || name] = value;
   }
   if (voidTags.has(node.tag)) return createElement(node.tag, props);
-  return createElement(node.tag, props, ...node.children.map((child, index) => render(child, index)));
+  const directText=node.children.filter((c):c is string=>typeof c==="string").join(" ").replace(/\s+/g," ").trim();
+  const editable=copyFields.find(field=>field.original===directText);
+  if(editable && overrides[editable.key]!==undefined) return createElement(node.tag,props,overrides[editable.key]);
+  return createElement(node.tag, props, ...node.children.map((child, index) => render(child, index, overrides)));
 }
-export function ApprovedRegions() {
-  return createElement(Fragment, null, ...nodes.map((node, index) => render(node, index)));
+export function ApprovedRegions({overrides={}}:{overrides?:Partial<Record<StoreCopyKey,string>>}) {
+  return createElement(Fragment, null, ...nodes.map((node, index) => render(node, index, overrides)));
 }

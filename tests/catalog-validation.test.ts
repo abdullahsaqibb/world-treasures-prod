@@ -1,0 +1,96 @@
+import test from "node:test";
+import {inspectMediaCandidate,inspectMediaSelection,imageSignatureMatches,MEDIA_MAX_BYTES} from "../src/lib/media-policy";
+import {canAppearInPublicCatalog,publicProductWhere} from "../src/lib/product-visibility";
+import assert from "node:assert/strict";
+import {money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock,checkPublishEligibility} from "../src/lib/catalog-validation";
+
+test("ZAR amounts convert to precise integer cents",()=>{
+ assert.equal(money("12.50"),1250);
+ assert.equal(money("12"),1200);
+ assert.equal(money("0.01"),1);
+ assert.equal(money("1000000"),100000000);
+});
+test("ZAR validation rejects negatives, excess decimals, scientific notation and oversized amounts",()=>{
+ for(const value of ["-1","1.005","1e6","","1000000.01","1,000","NaN"," 1", "Infinity"]){
+  assert.throws(()=>money(value),undefined,"Should reject "+value);
+ }
+});
+test("stock quantity only accepts nonnegative integers within limit",()=>{
+ assert.equal(qty("0"),0);
+ assert.equal(qty("1000000"),1000000);
+ for(const value of ["-1","2.3","1e2","1000001","NaN",""])assert.throws(()=>qty(value));
+});
+test("name and descriptions are trimmed and size-limited",()=>{
+ assert.equal(clean("  Takis Fuego  "),"Takis Fuego");
+ assert.equal(optionalText(null),"");
+ assert.throws(()=>clean(" "));
+ assert.throws(()=>clean("a".repeat(151)));
+ assert.throws(()=>optionalText("a".repeat(1501)));
+});
+test("slugs normalize names and reject blank-only handles after normalization",()=>{
+ assert.equal(slugify(" Takis Fuego · 90g "),"takis-fuego-90g");
+ assert.equal(slugify("**"),"");
+});
+test("images permit local paths or HTTPS and block unsafe schemes or traversal",()=>{
+ assert.equal(imagePath(""),null);
+ assert.equal(imagePath("/products/takis.webp"),"/products/takis.webp");
+ assert.equal(imagePath("https://example.com/a.png"),"https://example.com/a.png");
+ for(const value of ["javascript:alert(1)","data:image/svg+xml,foo","http://example.com/x.png","//evil.example.com/path","/products/../hidden","/products/hello world.png","https://user:pass@example.com/photo.jpg"])assert.throws(()=>imagePath(value));
+});
+test("stock cannot be below reserved units",()=>{
+ checkAvailableStock(12,2);
+ checkAvailableStock(2,2);
+ assert.throws(()=>checkAvailableStock(1,2));
+ assert.throws(()=>checkAvailableStock(-1,0));
+ assert.throws(()=>checkAvailableStock(5,-1));
+});
+
+test("publishing rejects unverified, unpriced or incomplete products",()=>{
+ const valid={verified:true,name:"Takis Fuego 90g",description:"Imported savoury snack",images:["/products/berry.webp"],variants:[{sku:"WT-TAKIS",priceCents:4990,onHand:3,reserved:0}]};
+ assert.doesNotThrow(()=>checkPublishEligibility(valid));
+ assert.throws(()=>checkPublishEligibility({...valid,verified:false}),/Verify/);
+ assert.throws(()=>checkPublishEligibility({...valid,description:""}),/description/);
+ assert.throws(()=>checkPublishEligibility({...valid,images:[]}),/photo/);
+ assert.throws(()=>checkPublishEligibility({...valid,variants:[]}),/variant/);
+ assert.throws(()=>checkPublishEligibility({...valid,variants:[{...valid.variants[0],priceCents:0}]}),/price/);
+ assert.throws(()=>checkPublishEligibility({...valid,variants:[{...valid.variants[0],onHand:0,reserved:2}]}),/Stock/);
+});
+
+test("public catalog never displays drafts, archives or unverified records",()=>{
+ assert.deepEqual(publicProductWhere,{status:"ACTIVE",verified:true});
+ assert.equal(canAppearInPublicCatalog({status:"ACTIVE",verified:true}),true);
+ assert.equal(canAppearInPublicCatalog({status:"ACTIVE",verified:false}),false);
+ assert.equal(canAppearInPublicCatalog({status:"DRAFT",verified:true}),false);
+ assert.equal(canAppearInPublicCatalog({status:"ARCHIVED",verified:true}),false);
+});
+
+test("media preflight permits real image types with safe filenames",()=>{
+ const base={name:"pack-front.webp",size:524288,type:"image/webp"};
+ assert.equal(inspectMediaCandidate(base),null);
+ assert.equal(inspectMediaCandidate({...base,type:"image/jpeg",name:"front.jpg"}),null);
+ assert.equal(inspectMediaCandidate({...base,type:"image/png",name:"back.png"}),null);
+ assert.equal(inspectMediaCandidate({...base,type:"image/avif",name:"front.avif"}),null);
+});
+test("media preflight rejects oversized, invalid or non-image files",()=>{
+ const base={name:"photo.webp",size:1000,type:"image/webp"};
+ assert.match(inspectMediaCandidate({...base,size:MEDIA_MAX_BYTES+1})??"",/8 MB/);
+ assert.match(inspectMediaCandidate({...base,size:0})??"",/empty/);
+ assert.match(inspectMediaCandidate({...base,name:"../fake.png"})??"",/file name/);
+ assert.match(inspectMediaCandidate({...base,type:"image/svg+xml"})??"",/JPEG/);
+ assert.match(inspectMediaCandidate({...base,type:"application/pdf"})??"",/JPEG/);
+ assert.equal(inspectMediaSelection(Array.from({length:9},()=>base)).length,1);
+ assert.deepEqual(inspectMediaSelection([base]),[]);
+});
+
+test("Cloudflare R2 upload verification identifies real photo signatures",()=>{
+ const bytes=(...n:number[])=>new Uint8Array(n);
+ assert.equal(imageSignatureMatches("image/jpeg",bytes(255,216,255,224)),true);
+ assert.equal(imageSignatureMatches("image/jpeg",bytes(255,217,255)),false);
+ assert.equal(imageSignatureMatches("image/png",bytes(137,80,78,71,13,10,26,10)),true);
+ assert.equal(imageSignatureMatches("image/png",bytes(137,80,78,71,10,10,26,10)),false);
+ assert.equal(imageSignatureMatches("image/webp",new TextEncoder().encode("RIFFxxxxWEBPfoo")),true);
+ assert.equal(imageSignatureMatches("image/webp",new TextEncoder().encode("RIFFxxxxGIF8foo")),false);
+ assert.equal(imageSignatureMatches("image/avif",new TextEncoder().encode("xxxxftypavif")),true);
+ assert.equal(imageSignatureMatches("image/avif",new TextEncoder().encode("xxxxftypmp42")),false);
+ assert.equal(imageSignatureMatches("image/svg+xml",new TextEncoder().encode("<svg>")),false);
+});
