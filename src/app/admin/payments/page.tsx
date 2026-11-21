@@ -1,0 +1,4 @@
+import {ensureAdminPage} from "@/lib/admin-access";
+import {AdminFeaturePage} from "../AdminFeaturePage";
+export const dynamic="force-dynamic";
+export default async function Page(){await ensureAdminPage();return <AdminFeaturePage eyebrow="finance / gateway" title="Payment management" description="Monitor PayFast connectivity and payment states with appropriate controls." icon="wallet" items={[{"title":"PayFast connection","detail":"Sandbox and production credentials with clear environment separation"},{"title":"Transactions","detail":"Payment state, references, webhook events and audit trail"},{"title":"Refund workflows","detail":"Authorized refunds and refund reconciliation"},{"title":"Payment incidents","detail":"Failed payments, duplicate event protection and alerts"}]} note="Payment provider credentials must remain in encrypted server-side settings; payment actions will be inactive until verified."/>;}

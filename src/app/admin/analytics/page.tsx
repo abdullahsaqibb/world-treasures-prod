@@ -1,0 +1,4 @@
+import {ensureAdminPage} from "@/lib/admin-access";
+import {AdminFeaturePage} from "../AdminFeaturePage";
+export const dynamic="force-dynamic";
+export default async function Page(){await ensureAdminPage();return <AdminFeaturePage eyebrow="reports / performance" title="Analytics & reporting" description="A reliable picture of sales, demand, fulfillment and store growth." icon="chart" items={[{"title":"Sales and revenue","detail":"Daily, weekly, monthly and custom-period reporting"},{"title":"Product performance","detail":"Best sellers, category movement and inventory velocity"},{"title":"Order funnel","detail":"Conversion and abandoned checkout reporting once tracking is implemented"},{"title":"Exports","detail":"CSV and printable operational reports"}]} note="Sales metrics must be based on verified paid orders, not demo transactions or estimated storefront clicks."/>;}
