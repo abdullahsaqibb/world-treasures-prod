@@ -49,10 +49,10 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
    <label className="wt-field">Main product image<small>Image preview updates automatically on the right</small><input name="image" maxLength={1200} value={image} onChange={e=>{setImage(e.target.value);setImageFailed(false);}} placeholder="/products/takis.webp or https://…"/></label>
    <label className="wt-field">Additional gallery images (one URL per line)<small>Up to 7 additional photos. The main image appears first in the storefront gallery.</small><textarea name="galleryUrls" rows={4} maxLength={7800} value={gallery} onChange={e=>setGallery(e.target.value)} placeholder={"https://example.com/front.webp\\nhttps://example.com/back.webp"}/></label>
    <CloudinaryUploader onUploaded={url=>{if(!image){setImage(url);setImageFailed(false)}else{setGallery(current=>[...new Set([...current.split("\n").map(u=>u.trim()).filter(Boolean),url])].join("\n"))}}}/>
-   <div className="wt-help">Upload uses Cloudinary in this development preview. New images are only linked to your product after you save the product form.</div>
+   <div className="wt-help">Cloudinary images are linked to this environment’s product record only when you save the form. Preview and Production maintain separate product records.</div>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">STEP 04 / QUALITY CONTROL</span><h2>Review the listing</h2></div></div>
-   <p className="wt-help">Publishing requires verified packaging, a description, real pricing and at least one image. Published products appear in the development storefront catalog; payments remain disabled.</p>
+   <p className="wt-help">Publishing requires verified packaging, a description, real pricing and at least one image. Published products appear in this environment’s verified catalogue; changes made on Preview do not sync to the live store. Payments remain disabled.</p>
    {editing?<div className="wt-formgrid">
     <label className="wt-field">Catalog status<select name="status" defaultValue={product?.status??"DRAFT"}><option value="DRAFT">Draft — private listing</option><option value="ACTIVE">Published — visible in verified catalog</option><option value="ARCHIVED">Archived — hide in catalog</option></select></label>
     <div className="wt-field"><span>Supplier / package verification</span><label className="wt-check"><input type="checkbox" name="verified" defaultChecked={product?.verified}/> I checked the information against the actual item.</label><small>Required before selecting Published. Only check this after verifying product information.</small></div>
@@ -62,7 +62,7 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
  <aside className="wt-product-editor-side">
   <section className="wt-card"><div className="wt-cardhead"><div><span className="wt-eyebrow">REAL-TIME PREVIEW</span><h2>Product card</h2></div></div>
    <div className="wt-product-preview">{image&&imageAllowed&&!imageFailed?<img src={image} alt="Preview of product" onError={()=>setImageFailed(true)}/>:<div className="wt-product-preview-placeholder">{imageFailed?"Image could not be loaded — check the URL":"Your product photo will appear here"}</div>}<small>{selectedCategory}</small><strong>{name||"Your product name"}</strong><b>R {Number.isFinite(Number(price))?Number(price||0).toFixed(2):"0.00"}</b></div>
-   <p className="wt-lede" style={{fontSize:12,marginTop:14}}>Preview of the development listing, not a public product page.</p>
+   <p className="wt-lede" style={{fontSize:12,marginTop:14}}>Preview of this product listing. Public visibility requires ACTIVE status and verification.</p>
   </section>
   <section className="wt-card"><div className="wt-cardhead"><h2>Before you save</h2></div><ul className="wt-review-points">
    <li><span>✓</span> Check the product name and package size</li>
@@ -74,7 +74,7 @@ export default function ProductEditor({categories,product}:{categories:CategoryO
  </aside>
  </div>
  {result.message&&<div role={result.ok?"status":"alert"} aria-live="polite" className={"wt-help "+(result.ok?"wt-form-success":"wt-form-error")}>{result.message}</div>}
- <div className="wt-editor-savebar"><small>Changes are saved to the <strong>development</strong> catalog.</small><div className="wt-actions"><Link className="wt-btn light" href="/admin/products">Cancel</Link><PendingSubmit pendingText={editing?"Saving product…":"Creating draft…"}>{editing?"Save product changes":"Save as draft →"}</PendingSubmit></div></div>
+ <div className="wt-editor-savebar"><small>Changes are saved to the database attached to <strong>this environment</strong>.</small><div className="wt-actions"><Link className="wt-btn light" href="/admin/products">Cancel</Link><PendingSubmit pendingText={editing?"Saving product…":"Creating draft…"}>{editing?"Save product changes":"Save as draft →"}</PendingSubmit></div></div>
  </form></div>;
 
 }
