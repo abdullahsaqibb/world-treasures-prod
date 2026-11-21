@@ -1,6 +1,8 @@
 import React, { createElement, Fragment } from "react";
 import source from "@/data/approved-markup.json";
 import {copyFields,StoreCopyKey} from "@/lib/storefront-copy";
+import type {StorefrontItem} from "@/lib/storefront-products";
+import {VerifiedCollections} from "./VerifiedCollections";
 
 type SourceNode = string | { tag: string; attrs: Record<string, string>; children: SourceNode[] };
 const nodes = source as SourceNode[];
@@ -28,21 +30,32 @@ const aliases: Record<string,string> = {
 };
 const flags = new Set(["disabled", "checked", "selected", "multiple", "hidden", "required", "open", "controls", "loop", "muted", "autoplay"]);
 const voidTags = new Set(["img", "input", "br", "hr", "meta", "link", "source", "area", "col", "embed", "wbr"]);
-function render(node: SourceNode, key: number | string, overrides: Partial<Record<StoreCopyKey,string>>): React.ReactNode {
+function render(node: SourceNode, key: number | string, overrides: Partial<Record<StoreCopyKey,string>>, products:StorefrontItem[]): React.ReactNode {
   if (typeof node === "string") return node;
+  // Retire hardcoded demo product stories, offers, pseudo-bundles and arrivals.
+  // Real merchandise in these areas is now managed by the shared live catalogue.
+  if(["flavourLab","mixBox","bundles","countries","arrivals"].includes(node.attrs?.id??""))return null;
+  if(node.attrs?.class?.split(" ").includes("arrivals")&&node.tag==="section")return null;
   const props: Record<string, unknown> = { key };
   for (const [name, value] of Object.entries(node.attrs)) {
     if (name.startsWith("on")) continue;
     if (name === "style") { props.style = cssStyle(value); continue; }
     if (flags.has(name)) { props[aliases[name] || name] = true; continue; }
-    props[aliases[name] || name] = value;
+    // Existing navigation must not point to removed demo-only merchandising sections.
+    props[aliases[name] || name] = name==="href"&&["#arrivals","#bundles","#flavourLab"].includes(value)?"#shop":value;
   }
   if (voidTags.has(node.tag)) return createElement(node.tag, props);
   const directText=node.children.filter((c):c is string=>typeof c==="string").join(" ").replace(/\s+/g," ").trim();
   const editable=copyFields.find(field=>field.original===directText);
   if(editable && overrides[editable.key]!==undefined) return createElement(node.tag,props,overrides[editable.key]);
-  return createElement(node.tag, props, ...node.children.map((child, index) => render(child, index, overrides)));
+  const children=node.children.flatMap((child,index)=>{
+    if(typeof child!=="string"&&child.tag==="section"&&child.attrs?.id==="shop"){
+      return [render(child,index,overrides,products),createElement(VerifiedCollections,{products,key:"verified-arrivals"})];
+    }
+    return [render(child,index,overrides,products)];
+  });
+  return createElement(node.tag, props, ...children);
 }
-export function ApprovedRegions({overrides={}}:{overrides?:Partial<Record<StoreCopyKey,string>>}) {
-  return createElement(Fragment, null, ...nodes.map((node, index) => render(node, index, overrides)));
+export function ApprovedRegions({overrides={},products=[]}:{overrides?:Partial<Record<StoreCopyKey,string>>;products?:StorefrontItem[]}) {
+  return createElement(Fragment, null, ...nodes.filter(node=>typeof node==="string"||node.attrs?.class!=="exclusive-bar").map((node,index)=>render(node,index,overrides,products)));
 }
