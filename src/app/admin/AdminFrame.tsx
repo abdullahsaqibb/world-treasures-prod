@@ -19,14 +19,14 @@ function NavContent({pathname,onSelect}:{pathname:string;onSelect?:()=>void}){
  return item.planned?<span key={item.href} className="wt-nav-link wt-nav-planned" aria-disabled="true" title={item.label+" is not available yet"}><AdminIcon name={item.icon}/><span>{item.label}</span><small>soon</small></span>:<Link onClick={onSelect} key={item.href} href={item.href} className={"wt-nav-link"+(active?" is-active":"")} aria-current={active?"page":undefined}><AdminIcon name={item.icon}/><span>{item.label}</span></Link>;
  })}</div></section>)}</>;
 }
-export function AdminFrame({children,email}:{children:React.ReactNode;email?:string|null}){
+export function AdminFrame({children,email,isProduction}:{children:React.ReactNode;email?:string|null;isProduction:boolean}){
  const pathname=usePathname(),router=useRouter(),[search,setSearch]=useState(""),[mobile,setMobile]=useState(false);
  const section=nav.flatMap(x=>x.items).filter(item=>pathname===item.href||pathname.startsWith(item.href+"/")).sort((a,b)=>b.href.length-a.href.length)[0];
  return <div className="wt-admin"><div className="wt-admin-shell">
  <aside className="wt-admin-sidebar">
   <Link href="/admin" className="wt-admin-brand"><span className="wt-admin-logomark">W<span>T</span></span><span><strong>WORLD TREASURES</strong><small>Merchant workspace</small></span></Link>
   <div className="wt-admin-sidebar-scroll"><NavContent pathname={pathname}/></div>
-  <div className="wt-admin-sidefooter"><span className="wt-admin-envdot"/><div><strong>Development environment</strong><small>Safe testing workspace</small></div></div>
+  <div className="wt-admin-sidefooter"><span className="wt-admin-envdot"/><div><strong>{isProduction?"LIVE PRODUCTION":"PREVIEW SANDBOX"}</strong><small>{isProduction?"Changes publish to live catalogue":"Changes here do not sync to live"}</small></div></div>
  </aside>
  <div className="wt-admin-workspace">
   <header className="wt-admin-topbar">
@@ -36,6 +36,6 @@ export function AdminFrame({children,email}:{children:React.ReactNode;email?:str
    <div className="wt-admin-tools"><Link href="/admin/products/new" className="wt-admin-create">+ <span>New product</span></Link><Link href="/" className="wt-admin-viewstore" target="_blank" rel="noopener noreferrer" title="Preview storefront">↗ <span>Store</span></Link><div className="wt-admin-avatar" title={email||"Administrator"}>{email?.charAt(0).toUpperCase()||"A"}</div><form action={adminSignOut}><button type="submit" className="wt-admin-viewstore wt-admin-signout" title="Sign out of Merchant Studio">Sign out</button></form></div>
   </header>
   {mobile&&<div className="wt-admin-mobile-overlay"><button onClick={()=>setMobile(false)} aria-label="Close menu" className="wt-admin-overlay-close">Close ×</button><NavContent pathname={pathname} onSelect={()=>setMobile(false)}/></div>}
-  <main className="wt-body"><div className="wt-admin-content">{children}</div></main>
+  <main className="wt-body"><div className="wt-admin-content">{!isProduction&&<div role="alert" style={{background:"#fff2d5",color:"#6a3505",border:"2px solid #e8ad51",padding:"14px 18px",borderRadius:10,marginBottom:18,fontWeight:700}}>PREVIEW SANDBOX — Products created here do not appear on the live store. <a href="https://www.worldtreasures.co.za/admin/products" style={{textDecoration:"underline",color:"#7d3100",marginLeft:8}}>Manage live products →</a></div>}{children}</div></main>
  </div></div></div>;
 }
