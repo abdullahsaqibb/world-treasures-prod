@@ -41,7 +41,8 @@ function render(node: SourceNode, key: number | string, overrides: Partial<Recor
     if (name.startsWith("on")) continue;
     if (name === "style") { props.style = cssStyle(value); continue; }
     if (flags.has(name)) { props[aliases[name] || name] = true; continue; }
-    props[aliases[name] || name] = value;
+    // Existing navigation must not point to removed demo-only merchandising sections.
+    props[aliases[name] || name] = name==="href"&&["#arrivals","#bundles","#flavourLab"].includes(value)?"#shop":value;
   }
   if (voidTags.has(node.tag)) return createElement(node.tag, props);
   const directText=node.children.filter((c):c is string=>typeof c==="string").join(" ").replace(/\s+/g," ").trim();
