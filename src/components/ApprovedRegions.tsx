@@ -15,14 +15,15 @@ const publicCopy:Record<string,string>={
  "Check the product’s ingredients tab and physical label before eating. All ingredients in this prototype are fictional. Ask the store for verified information, especially if you have an allergy.":"Always read the packaging, ingredient list and allergen warnings on the actual product. Imported packaging can vary by batch; do not rely on illustrative product photographs for allergy decisions.",
  "Why do imported labels sometimes look different?":"Why might imported packaging differ?",
  "Packaging can vary by market. The live shop should provide verified local label information, origin, storage and expiry details for each batch.":"International packaging can differ between markets and batches. Verify the actual label, ingredients, storage instructions and expiry date before consuming.",
- "⌂ Free click & collect":"⌂ Collection information coming soon",
+ "Free click & collect":"Collection coming soon",
  "Demo delivery: Central R35 · North R45 · South R50":"Delivery fees will be confirmed before checkout opens",
  "Delivery minimum R100 · Free store pickup":"Online ordering and delivery are not enabled yet",
  "Newsletter is a demo; no data is submitted.":"Newsletter signup is not active yet.",
  "Store address, delivery zones and policies await confirmation.":"Business location and delivery coverage will be announced when confirmed.",
  "Prices and stock are demo values. Takis Fuego and Ben & Jerry’s are online examples, not confirmed store inventory.":"Products and pricing are maintained in the World Treasures catalogue. Photographs may show packaging from different markets or batches.",
  "All added products are catalogue examples, not confirmed store inventory. Rear reference is a Vietnamese-market edition; verify your own batch before launch.":"Packaging and label details may differ from illustrative photographs. Always check the actual product.",
- "UI PROTOTYPE · NO REAL ORDERS OR PAYMENTS":"BROWSE-ONLY CATALOGUE · ONLINE ORDERS COMING SOON"
+ "UI PROTOTYPE · NO REAL ORDERS OR PAYMENTS":"BROWSE-ONLY CATALOGUE · ONLINE ORDERS COMING SOON",
+ "DEMO PRICING AND STOCK. THIS PROTOTYPE DOES NOT PLACE REAL ORDERS.":"Bundle previews only. No real orders or payments are accepted."
 };
 
 const nodes = source as SourceNode[];
