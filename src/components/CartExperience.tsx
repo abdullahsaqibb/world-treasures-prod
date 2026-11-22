@@ -153,9 +153,9 @@ export function CartExperience({products,recoveredPreview=[]}:{products:Product[
    <div className="wt-bag-summary-row"><span>Subtotal</span><strong>{zar(total)}</strong></div>
    <p>Delivery calculated at checkout.<br/>Store collection is free.</p>
    <p className="wt-bag-delivery-note">Delivery rates are confirmed during checkout.</p>
-   <button className="wt-cart-primary" type="button" onClick={startCheckout}>Checkout →</button>
+   <button className="wt-cart-primary" type="button" disabled aria-disabled="true" title="Online checkout will open after delivery and payments are verified">Checkout coming soon</button>
    <div className="wt-bag-payfast"><strong>Payment placeholder</strong><small>Payments are not enabled</small></div>
-   <p className="wt-cart-disclaimer">Prototype checkout. No payment or order is sent.</p>
+   <p className="wt-cart-disclaimer">Browse-only preview: no checkout, order or payment can be submitted.</p>
    <div className="wt-cart-bag-bottom">
     <p className="wt-cart-bag-label">YOUR ORDER, PACKED TOGETHER</p>
     <button type="button" className="wt-cart-basket-toggle wt-cart-bag-basket" aria-label="Open the products inside your basket" aria-expanded={expanded} onClick={()=>setExpanded(true)}>
