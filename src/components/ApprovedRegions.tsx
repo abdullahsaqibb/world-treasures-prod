@@ -19,7 +19,9 @@ const publicCopy:Record<string,string>={
  "Demo delivery: Central R35 · North R45 · South R50":"Delivery fees will be confirmed before checkout opens",
  "Delivery minimum R100 · Free store pickup":"Online ordering and delivery are not enabled yet",
  "Newsletter is a demo; no data is submitted.":"Newsletter signup is not active yet.",
- "Store address, delivery zones and policies await confirmation.":"Business location and delivery coverage will be announced when confirmed.",
+ "Store address, delivery zones and policies await confirmation.":"Find us at 60-A Heugh Road, Walmer, Port Elizabeth (Gqeberha), Eastern Cape. Delivery coverage and policies are still being confirmed.",
+ "World Treasures · [Street address]":"World Treasures · 60-A Heugh Road",
+ "[Suburb], [City], South Africa":"Opposite McDonald’s, Walmer, Port Elizabeth (Gqeberha), Eastern Cape, South Africa",
  "Prices and stock are demo values. Takis Fuego and Ben & Jerry’s are online examples, not confirmed store inventory.":"Products and pricing are maintained in the World Treasures catalogue. Photographs may show packaging from different markets or batches.",
  "All added products are catalogue examples, not confirmed store inventory. Rear reference is a Vietnamese-market edition; verify your own batch before launch.":"Packaging and label details may differ from illustrative photographs. Always check the actual product.",
  "UI PROTOTYPE · NO REAL ORDERS OR PAYMENTS":"BROWSE-ONLY CATALOGUE · ONLINE ORDERS COMING SOON",
@@ -68,16 +70,29 @@ function render(node: SourceNode, key: number | string, overrides: Partial<Recor
   // Keep the prototype layout, but never show fictional reviews, placeholder
   // premises/hours or unconfirmed social profiles as real business information.
   if(node.tag==="section"&&(
-    node.attrs?.id==="visit"||
     node.attrs?.class?.split(" ").includes("reviews")||
     (node.attrs?.class==="section"&&JSON.stringify(node.children).includes("THE GROUP CHAT WAS RIGHT"))
   ))return null;
+  // The owner supplied the exact premises address. Reuse the approved visit layout,
+  // but never display demo opening hours or an inaccurate map placeholder.
+  if(section==="visit"&&(
+    node.attrs?.class==="hours"||
+    node.attrs?.class==="demo-note"||
+    node.attrs?.class==="map"
+  ))return null;
+  if(section==="visit"&&node.tag==="button"&&node.children.some(c=>typeof c==="string"&&c.includes("Get directions"))){
+    return createElement("a",{
+      key,
+      href:"https://www.google.com/maps/search/?api=1&query=60-A%20Heugh%20Road%2C%20Walmer%2C%20Port%20Elizabeth%2C%20South%20Africa",
+      target:"_blank",rel:"noopener noreferrer",className:"button"
+    },"Get directions →");
+  }
   if(node.tag==="a"&&(
     node.attrs?.href?.startsWith("https://wa.me/")||
     node.attrs?.href?.startsWith("tel:")||
     node.attrs?.href==="#visit"
   ))return null;
-    const nextSection=node.attrs?.id&&["mixBox","bundles","flavourLab"].includes(node.attrs.id)?node.attrs.id:section;
+    const nextSection=node.attrs?.id&&["mixBox","bundles","flavourLab","visit"].includes(node.attrs.id)?node.attrs.id:section;
   const props: Record<string, unknown> = { key };
   for (const [name, value] of Object.entries(node.attrs)) {
     if (name.startsWith("on")) continue;
