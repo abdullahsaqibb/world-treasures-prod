@@ -19,6 +19,7 @@ async function updateInventoryWithoutDroppingReservations(tx:Prisma.TransactionC
 import { requireAdmin } from "@/auth";
 import {galleryFromForm} from "@/lib/catalog-images";
 import { revalidatePath } from "next/cache";
+import {parseDeliveryService} from "@/lib/delivery-services";
 import { money,qty,clean,optionalText,slugify,imagePath,checkAvailableStock,checkPublishEligibility } from "@/lib/catalog-validation";
 
 export async function saveProduct(form:FormData){
@@ -50,6 +51,28 @@ export async function saveDeliveryCity(form:FormData){
  const old=await db.shippingRate.findFirst({where:{cityId:city.id,service:"STANDARD",courier:null},orderBy:{createdAt:"desc"}});
  if(old){await db.shippingRate.update({where:{id:old.id},data:{feeCents,active}});}
  else{await db.shippingRate.create({data:{cityId:city.id,feeCents,active,service:"STANDARD"}});}
+ revalidatePath("/admin/delivery");revalidatePath("/admin/readiness");
+}
+/** Separate rate books for local driver delivery and intercity courier shipping. */
+export async function saveDeliveryService(form:FormData){
+ await requireAdmin();
+ const name=clean(form.get("city"),100);
+ const province=clean(form.get("province"),100);
+ const service=parseDeliveryService(form.get("service"));
+ const normalizedName=name.toLocaleLowerCase("en-ZA").replace(/\s+/g," ");
+ const feeCents=money(form.get("feeZar"));
+ const publish=form.get("active")==="on";
+ await db.$transaction(async tx=>{
+  const city=await tx.city.upsert({
+   where:{province_normalizedName:{province,normalizedName}},
+   create:{name,province,normalizedName,active:publish,aliases:[]},
+   update:{name}
+  });
+  const existing=await tx.shippingRate.findFirst({where:{cityId:city.id,service,courier:null},orderBy:{createdAt:"desc"}});
+  if(existing)await tx.shippingRate.update({where:{id:existing.id},data:{feeCents,active:publish}});
+  else await tx.shippingRate.create({data:{cityId:city.id,service,feeCents,active:publish}});
+  if(publish)await tx.city.update({where:{id:city.id},data:{active:true}});
+ });
  revalidatePath("/admin/delivery");revalidatePath("/admin/readiness");
 }
 export async function updateDeliveryRate(form:FormData){
