@@ -1,5 +1,4 @@
 -- Prepared for isolated development migration. No production data changed.
-ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "customerIdentityEnabled" BOOLEAN NOT NULL DEFAULT false;
 CREATE TABLE "CustomerLoginChallenge" (
  "id" TEXT NOT NULL,
  "email" TEXT NOT NULL,
