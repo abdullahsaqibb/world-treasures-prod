@@ -58,7 +58,7 @@ export function buildAccountActionNotice(kind:"ACCOUNT_VERIFICATION"|"PASSWORD_R
  const name=safeName(customerName);
  const url=new URL(actionUrl);
  if(url.protocol!=="https:"||url.host!=="www.worldtreasures.co.za"||
-  (kind==="ACCOUNT_VERIFICATION"?!url.pathname.startsWith("/account/verify"):!url.pathname.startsWith("/account/reset")))
+  (kind==="ACCOUNT_VERIFICATION"?url.pathname!=="/account/verify":url.pathname!=="/account/reset"))
   throw new Error("Invalid account action URL");
  const heading=kind==="ACCOUNT_VERIFICATION"?"Verify your email address":"Reset your password";
  const message=kind==="ACCOUNT_VERIFICATION"?"Please verify your email address using the secure link below.":"A password reset was requested for your account. Ignore this message if you did not request it.";
