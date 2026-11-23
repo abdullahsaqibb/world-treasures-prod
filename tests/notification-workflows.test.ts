@@ -1,6 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
-import {buildOrderPlacedNotice,buildWelcomeNotice,buildOrderLifecyclePreview,notificationCatalog} from "../src/lib/notification-workflows";
+import {buildOrderPlacedNotice,buildWelcomeNotice,buildOrderLifecyclePreview,buildAccountActionNotice,buildCartReminderNotice,notificationCatalog} from "../src/lib/notification-workflows";
 test("all customer email events have explicit source requirements",()=>{
  assert.equal(notificationCatalog.length,11);
  assert.equal(notificationCatalog.find(x=>x.kind==="CART_REMINDER")?.source,"consented_marketing");
@@ -26,4 +26,17 @@ test("transactional preview adapter does not send and guards unsupported events"
  assert.match(buildOrderLifecyclePreview("PAYMENT_CONFIRMED",d).subject,/Payment confirmed/);
  assert.match(buildOrderLifecyclePreview("ORDER_SHIPPED",d,{courier:"Courier",trackingNumber:"ABC123"}).subject,/on its way/);
  assert.throws(()=>buildOrderLifecyclePreview("CART_REMINDER",d),/separate/);
+});
+
+test("account verification and password reset URLs stay on the store domain",()=>{
+ const verify=buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex","https://www.worldtreasures.co.za/account/verify?token=abc123");
+ assert.match(verify.text,/account\/verify/);
+ const reset=buildAccountActionNotice("PASSWORD_RESET","Alex","https://www.worldtreasures.co.za/account/reset?token=xyz");
+ assert.match(reset.subject,/Reset your password/);
+ assert.throws(()=>buildAccountActionNotice("PASSWORD_RESET","Alex","https://evil.example/account/reset?token=x"),/Invalid/);
+ assert.throws(()=>buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex","http://www.worldtreasures.co.za/account/verify"),/Invalid/);
+});
+test("cart reminder requires marketing consent and cannot send from basket action alone",()=>{
+ assert.throws(()=>buildCartReminderNotice("Alex",false),/consent/);
+ assert.match(buildCartReminderNotice("Alex",true).subject,/bag/);
 });
