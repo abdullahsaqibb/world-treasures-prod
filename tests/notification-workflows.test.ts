@@ -35,6 +35,8 @@ test("account verification and password reset URLs stay on the store domain",()=
  assert.match(reset.subject,/Reset your password/);
  assert.throws(()=>buildAccountActionNotice("PASSWORD_RESET","Alex","https://evil.example/account/reset?token=x"),/Invalid/);
  assert.throws(()=>buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex","http://www.worldtreasures.co.za/account/verify"),/Invalid/);
+ assert.throws(()=>buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex","https://www.worldtreasures.co.za/account/verify-malicious?token=x"),/Invalid/);
+ assert.throws(()=>buildAccountActionNotice("PASSWORD_RESET","Alex","https://www.worldtreasures.co.za/account/reset-extra?token=x"),/Invalid/);
 });
 test("cart reminder requires marketing consent and cannot send from basket action alone",()=>{
  assert.throws(()=>buildCartReminderNotice("Alex",false),/consent/);
