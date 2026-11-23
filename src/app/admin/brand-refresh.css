@@ -202,3 +202,5 @@
 .wt-admin .wt-feature-row{background:#fffcf7;border-color:#ebe4d8}
 .wt-admin .wt-shortcut:focus-visible,.wt-admin .wt-action-list a:focus-visible{outline:3px solid #e97855;outline-offset:2px}
 @media(max-width:650px){.wt-admin .wt-admin-topbar{position:relative}}
+
+.wt-admin .wt-admin-logout-error{font-size:11px;color:#b0342b;max-width:200px;line-height:1.2}
