@@ -152,3 +152,34 @@
 .wt-admin .wt-media-preview-item .wt-btn{margin-top:auto;justify-content:center}
 .wt-admin .wt-media-imagebox{width:100%;overflow:hidden;background:#f3e6ee;border-radius:7px}
 @media(max-width:520px){.wt-admin .wt-media-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.wt-admin .wt-media-preview-item img{height:116px}}
+
+/* Merchant studio refinement: clear navigation, reliable header action hit targets,
+   reduced visual clutter, keyboard focus and responsive controls. */
+.wt-admin .wt-admin-topbar{position:sticky;top:0;z-index:30;gap:14px}
+.wt-admin .wt-admin-tools{gap:9px;flex-shrink:0}
+.wt-admin .wt-admin-create,.wt-admin .wt-admin-viewstore{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:750;white-space:nowrap;line-height:1.2;min-height:44px}
+.wt-admin .wt-admin-storelink{color:#20354b!important}
+.wt-admin .wt-admin-storelink:hover{background:#fff1df;border-color:#efb08c}
+.wt-admin .wt-admin-signout{background:#fff7f0!important;border:1px solid #f3cbb7!important;color:#914b34!important;cursor:pointer;font-family:inherit}
+.wt-admin .wt-admin-signout:hover{background:#ffeddf!important}
+.wt-admin .wt-admin-signout[disabled]{opacity:.65;cursor:progress}
+.wt-admin .wt-nav-link:hover:not(.wt-nav-planned){background:#ffffff1d;color:white;transform:translateX(2px)}
+.wt-admin .wt-nav-link.is-active:hover{background:#f9f5e9;color:#13243d}
+.wt-admin .wt-card{transition:border-color .15s ease}
+.wt-admin .wt-card:focus-within{border-color:#d4b795}
+.wt-admin a:focus-visible,.wt-admin button:focus-visible,.wt-admin input:focus-visible{outline:3px solid #e97855!important;outline-offset:3px}
+.wt-admin .wt-admin-avatar{flex-shrink:0}
+@media(max-width:650px){
+ .wt-admin .wt-admin-topbar{flex-wrap:wrap;justify-content:space-between}
+ .wt-admin .wt-admin-tools{margin-left:auto;gap:6px}
+ .wt-admin .wt-admin-create span,.wt-admin .wt-admin-storelink span{display:inline}
+ .wt-admin .wt-admin-create,.wt-admin .wt-admin-storelink,.wt-admin .wt-admin-signout{min-height:40px;padding:7px 9px;font-size:11px}
+ .wt-admin .wt-admin-avatar{display:none}
+}
+@media(max-width:390px){
+ .wt-admin .wt-admin-create span{display:none}
+ .wt-admin .wt-admin-storelink span{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .wt-admin .wt-nav-link:hover:not(.wt-nav-planned){transform:none}
+}
