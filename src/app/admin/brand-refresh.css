@@ -183,3 +183,22 @@
 @media(prefers-reduced-motion:reduce){
  .wt-admin .wt-nav-link:hover:not(.wt-nav-planned){transform:none}
 }
+
+/* November Merchant Studio visual polish:
+   warm editorial palette, restrained navy panels and practical data density. */
+.wt-admin{--bg:#f8f6f1;--surface:#fffefb;--line:#e5e0d7;background:var(--bg)}
+.wt-admin .wt-admin-topbar{background:#fffefa;border-bottom:1px solid #e4ded3}
+.wt-admin .wt-body{background:var(--bg)}
+.wt-admin .wt-hero-panel{background:linear-gradient(115deg,#17273e 0%,#23364b 70%,#354157 100%);border:1px solid #2a3e55;border-radius:15px;box-shadow:0 12px 32px #21354b1a}
+.wt-admin .wt-hero-panel h1{color:#fffdf8!important}
+.wt-admin .wt-hero-panel p{color:#d1d9df!important}
+.wt-admin .wt-hero-panel .wt-eyebrow{color:#f7aa7d}
+.wt-admin .wt-hero-panel .wt-btn,.wt-admin .wt-hero-panel .wt-btn:not(.light){background:#f8eee2!important;color:#17273e!important}
+.wt-admin .wt-hero-panel:after{border-color:#ffffff20;box-shadow:0 0 0 54px #ffffff07,0 0 0 116px #ffffff06}
+.wt-admin .wt-kpi{border:1px solid #e6ded2;background:#fffefb;border-radius:12px}
+.wt-admin .wt-kpi-icon{background:#f8ede4;color:#bb5937}
+.wt-admin .wt-action-icon{background:#fae9dd;color:#a44c2e}
+.wt-admin .wt-cardhead h2{font-size:19px!important}
+.wt-admin .wt-feature-row{background:#fffcf7;border-color:#ebe4d8}
+.wt-admin .wt-shortcut:focus-visible,.wt-admin .wt-action-list a:focus-visible{outline:3px solid #e97855;outline-offset:2px}
+@media(max-width:650px){.wt-admin .wt-admin-topbar{position:relative}}
