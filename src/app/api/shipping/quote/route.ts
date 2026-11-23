@@ -14,6 +14,8 @@ export async function GET(request:Request){
   try{service=parseDeliveryService(requested);}
   catch{return NextResponse.json({error:"Invalid delivery service"},{status:400});}
  }
+ // No trusted address-level distance provider is connected yet. Never treat a city as proof of <=15 km coverage.
+ if(service==="LOCAL")return NextResponse.json({error:"Local delivery address-distance verification is not available yet"},{status:409,headers:{"Cache-Control":"no-store"}});
  const now=new Date();
  const rate=await db.shippingRate.findFirst({
   where:{cityId,active:true,city:{active:true},service,validFrom:{lte:now},OR:[{validUntil:null},{validUntil:{gte:now}}]},
