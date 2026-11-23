@@ -2,7 +2,7 @@
 import {usePathname,useRouter} from "next/navigation";
 import Link from "next/link";
 import {useState} from "react";
-import {adminSignOut} from "./sign-out";
+import {signOut} from "next-auth/react";
 
 type NavItem={label:string;href:string;icon:string;planned?:boolean};
 const nav: {heading:string;items:NavItem[]}[]=[
@@ -20,11 +20,11 @@ function NavContent({pathname,onSelect}:{pathname:string;onSelect?:()=>void}){
  })}</div></section>)}</>;
 }
 export function AdminFrame({children,email,isProduction}:{children:React.ReactNode;email?:string|null;isProduction:boolean}){
- const pathname=usePathname(),router=useRouter(),[search,setSearch]=useState(""),[mobile,setMobile]=useState(false);
+ const pathname=usePathname(),router=useRouter(),[search,setSearch]=useState(""),[mobile,setMobile]=useState(false),[loggingOut,setLoggingOut]=useState(false),[logoutError,setLogoutError]=useState(false);
  const section=nav.flatMap(x=>x.items).filter(item=>pathname===item.href||pathname.startsWith(item.href+"/")).sort((a,b)=>b.href.length-a.href.length)[0];
  return <div className="wt-admin"><div className="wt-admin-shell">
  <aside className="wt-admin-sidebar">
-  <Link href="/admin" className="wt-admin-brand"><span className="wt-admin-logomark">W<span>T</span></span><span><strong>WORLD TREASURES</strong><small>Merchant workspace</small></span></Link>
+  <Link href="/admin" className="wt-admin-brand" aria-label="World Treasures admin overview"><span className="wt-admin-logomark">W<span>T</span></span><span><strong>WORLD TREASURES</strong><small>Merchant workspace</small></span></Link>
   <div className="wt-admin-sidebar-scroll"><NavContent pathname={pathname}/></div>
   <div className="wt-admin-sidefooter"><span className="wt-admin-envdot"/><div><strong>{isProduction?"LIVE PRODUCTION":"PREVIEW SANDBOX"}</strong><small>{isProduction?"Changes publish to live catalogue":"Changes here do not sync to live"}</small></div></div>
  </aside>
@@ -33,7 +33,7 @@ export function AdminFrame({children,email,isProduction}:{children:React.ReactNo
    <button type="button" className="wt-admin-mobile-toggle" onClick={()=>setMobile(v=>!v)} aria-expanded={mobile} aria-label="Open management menu">☰</button>
    <div className="wt-admin-breadcrumb"><span>Management</span><span className="wt-admin-crumbslash">/</span><strong>{section?.label||"Workspace"}</strong></div>
    <form role="search" className="wt-admin-global-search" onSubmit={e=>{e.preventDefault();router.push("/admin/products?q="+encodeURIComponent(search.trim()));setSearch("");}}><svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input aria-label="Search products" placeholder="Search products..." value={search} onChange={e=>setSearch(e.target.value)}/><kbd>↵</kbd></form>
-   <div className="wt-admin-tools"><Link href="/admin/products/new" className="wt-admin-create">+ <span>New product</span></Link><Link href="/" className="wt-admin-viewstore" target="_blank" rel="noopener noreferrer" title="Preview storefront">↗ <span>Store</span></Link><div className="wt-admin-avatar" title={email||"Administrator"}>{email?.charAt(0).toUpperCase()||"A"}</div><form action={adminSignOut}><button type="submit" className="wt-admin-viewstore wt-admin-signout" title="Sign out of Merchant Studio">Sign out</button></form></div>
+   <div className="wt-admin-tools"><Link href="/admin/products/new" className="wt-admin-create" aria-label="Add a new product" title="Add a new product">＋ <span>Add product</span></Link><Link href="/" className="wt-admin-viewstore wt-admin-storelink" title="View the World Treasures storefront" aria-label="View storefront home">↗ <span>View store</span></Link><div className="wt-admin-avatar" title={email||"Administrator"}>{email?.charAt(0).toUpperCase()||"A"}</div><button type="button" className="wt-admin-viewstore wt-admin-signout" disabled={loggingOut} aria-label={loggingOut?"Signing out":"Sign out of World Treasures admin"} onClick={async()=>{if(loggingOut)return;setLoggingOut(true);setLogoutError(false);try{await signOut({redirect:false});window.location.assign("/admin/login");}catch{setLoggingOut(false);setLogoutError(true);}}}>{loggingOut?"Signing out…":"Sign out"}</button>{logoutError&&<span role="alert" className="wt-admin-logout-error">Could not sign out. Please try again.</span>}</div>
   </header>
   {mobile&&<div className="wt-admin-mobile-overlay"><button onClick={()=>setMobile(false)} aria-label="Close menu" className="wt-admin-overlay-close">Close ×</button><NavContent pathname={pathname} onSelect={()=>setMobile(false)}/></div>}
   <main className="wt-body"><div className="wt-admin-content">{!isProduction&&<div role="alert" style={{background:"#fff2d5",color:"#6a3505",border:"2px solid #e8ad51",padding:"14px 18px",borderRadius:10,marginBottom:18,fontWeight:700}}>PREVIEW SANDBOX — Products created here do not appear on the live store. <a href="https://www.worldtreasures.co.za/admin/products" style={{textDecoration:"underline",color:"#7d3100",marginLeft:8}}>Manage live products →</a></div>}{children}</div></main>

@@ -3,7 +3,7 @@ import {getPublishedProducts,zar} from "@/lib/published-catalog";
 import "./catalog.css";
 import {getRecoveredShowcase} from "@/lib/recovered-showcase";
 export const dynamic="force-dynamic";
-export const metadata={title:"Verified Collection | World Treasures",description:"Browse the verified, currently published World Treasures collection."};
+export const metadata={title:"Imported Snacks & Drinks Collection",description:"Explore verified imported chips, candy, chocolates and drinks from World Treasures in Walmer, Port Elizabeth (Gqeberha), South Africa.",alternates:{canonical:"/catalog"},openGraph:{title:"Imported Snacks & Drinks | World Treasures",url:"https://www.worldtreasures.co.za/catalog"}};
 export default async function CatalogPage(){
  const [products,recoveredPreview]=await Promise.all([getPublishedProducts(),getRecoveredShowcase()]);
  return <main className="wt-live-catalog"><div className="wt-catalog-top"><div><div className="wt-catalog-kicker">WORLD TREASURES / VERIFIED COLLECTION</div><h1>THE GOOD STUFF.</h1><p className="wt-catalog-lead">Our latest verified and published products, managed directly from the World Treasures merchant portal.</p></div><Link className="wt-catalog-back" href="/">← Back to home</Link></div>

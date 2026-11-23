@@ -1,4 +1,6 @@
 import { auth,isAdminSession } from "@/auth";
+import type {Metadata} from "next";
+export const metadata:Metadata={robots:{index:false,follow:false},title:"Merchant Studio"};
 import { AdminFrame } from "./AdminFrame";
 import "./admin.css";
 import "./merchant-ui.css";

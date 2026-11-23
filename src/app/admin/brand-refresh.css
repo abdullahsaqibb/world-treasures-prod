@@ -152,3 +152,55 @@
 .wt-admin .wt-media-preview-item .wt-btn{margin-top:auto;justify-content:center}
 .wt-admin .wt-media-imagebox{width:100%;overflow:hidden;background:#f3e6ee;border-radius:7px}
 @media(max-width:520px){.wt-admin .wt-media-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.wt-admin .wt-media-preview-item img{height:116px}}
+
+/* Merchant studio refinement: clear navigation, reliable header action hit targets,
+   reduced visual clutter, keyboard focus and responsive controls. */
+.wt-admin .wt-admin-topbar{position:sticky;top:0;z-index:30;gap:14px}
+.wt-admin .wt-admin-tools{gap:9px;flex-shrink:0}
+.wt-admin .wt-admin-create,.wt-admin .wt-admin-viewstore{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:750;white-space:nowrap;line-height:1.2;min-height:44px}
+.wt-admin .wt-admin-storelink{color:#20354b!important}
+.wt-admin .wt-admin-storelink:hover{background:#fff1df;border-color:#efb08c}
+.wt-admin .wt-admin-signout{background:#fff7f0!important;border:1px solid #f3cbb7!important;color:#914b34!important;cursor:pointer;font-family:inherit}
+.wt-admin .wt-admin-signout:hover{background:#ffeddf!important}
+.wt-admin .wt-admin-signout[disabled]{opacity:.65;cursor:progress}
+.wt-admin .wt-nav-link:hover:not(.wt-nav-planned){background:#ffffff1d;color:white;transform:translateX(2px)}
+.wt-admin .wt-nav-link.is-active:hover{background:#f9f5e9;color:#13243d}
+.wt-admin .wt-card{transition:border-color .15s ease}
+.wt-admin .wt-card:focus-within{border-color:#d4b795}
+.wt-admin a:focus-visible,.wt-admin button:focus-visible,.wt-admin input:focus-visible{outline:3px solid #e97855!important;outline-offset:3px}
+.wt-admin .wt-admin-avatar{flex-shrink:0}
+@media(max-width:650px){
+ .wt-admin .wt-admin-topbar{flex-wrap:wrap;justify-content:space-between}
+ .wt-admin .wt-admin-tools{margin-left:auto;gap:6px}
+ .wt-admin .wt-admin-create span,.wt-admin .wt-admin-storelink span{display:inline}
+ .wt-admin .wt-admin-create,.wt-admin .wt-admin-storelink,.wt-admin .wt-admin-signout{min-height:40px;padding:7px 9px;font-size:11px}
+ .wt-admin .wt-admin-avatar{display:none}
+}
+@media(max-width:390px){
+ .wt-admin .wt-admin-create span{display:none}
+ .wt-admin .wt-admin-storelink span{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .wt-admin .wt-nav-link:hover:not(.wt-nav-planned){transform:none}
+}
+
+/* November Merchant Studio visual polish:
+   warm editorial palette, restrained navy panels and practical data density. */
+.wt-admin{--bg:#f8f6f1;--surface:#fffefb;--line:#e5e0d7;background:var(--bg)}
+.wt-admin .wt-admin-topbar{background:#fffefa;border-bottom:1px solid #e4ded3}
+.wt-admin .wt-body{background:var(--bg)}
+.wt-admin .wt-hero-panel{background:linear-gradient(115deg,#17273e 0%,#23364b 70%,#354157 100%);border:1px solid #2a3e55;border-radius:15px;box-shadow:0 12px 32px #21354b1a}
+.wt-admin .wt-hero-panel h1{color:#fffdf8!important}
+.wt-admin .wt-hero-panel p{color:#d1d9df!important}
+.wt-admin .wt-hero-panel .wt-eyebrow{color:#f7aa7d}
+.wt-admin .wt-hero-panel .wt-btn,.wt-admin .wt-hero-panel .wt-btn:not(.light){background:#f8eee2!important;color:#17273e!important}
+.wt-admin .wt-hero-panel:after{border-color:#ffffff20;box-shadow:0 0 0 54px #ffffff07,0 0 0 116px #ffffff06}
+.wt-admin .wt-kpi{border:1px solid #e6ded2;background:#fffefb;border-radius:12px}
+.wt-admin .wt-kpi-icon{background:#f8ede4;color:#bb5937}
+.wt-admin .wt-action-icon{background:#fae9dd;color:#a44c2e}
+.wt-admin .wt-cardhead h2{font-size:19px!important}
+.wt-admin .wt-feature-row{background:#fffcf7;border-color:#ebe4d8}
+.wt-admin .wt-shortcut:focus-visible,.wt-admin .wt-action-list a:focus-visible{outline:3px solid #e97855;outline-offset:2px}
+@media(max-width:650px){.wt-admin .wt-admin-topbar{position:relative}}
+
+.wt-admin .wt-admin-logout-error{font-size:11px;color:#b0342b;max-width:200px;line-height:1.2}
