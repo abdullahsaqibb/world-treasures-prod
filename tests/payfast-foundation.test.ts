@@ -1,3 +1,4 @@
+import {buildOrderStatusEmail} from "../src/lib/transactional-email";
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {payFastCanonical,payFastSignature,verifyPayFastSignature,payFastSettings,payFastCheckoutUrls,payFastValidationUrls} from "../src/lib/payfast";
@@ -31,4 +32,14 @@ test("order state changes require valid verified lifecycle event",()=>{
  assert.throws(()=>nextOrderState("DELIVERED","START_PROCESSING"),/Invalid/);
  assert.equal(noticeForEvent("PAYMENT_VERIFIED"),"PAYMENT_CONFIRMED");
  assert.equal(noticeForEvent("DISPATCH_CONFIRMED"),"SHIPPED");
+});
+
+test("customer status templates escape HTML and require genuine shipment tracking",()=>{
+ const shipping=buildOrderStatusEmail("SHIPPED","WT-123","<Alice>",{courier:"Test Courier",trackingNumber:"ABC-123"});
+ assert.match(shipping.html,/&lt;Alice&gt;/);
+ assert.match(shipping.text,/ABC-123/);
+ assert.throws(()=>buildOrderStatusEmail("SHIPPED","WT-123","Alice"),/tracking/);
+ assert.match(buildOrderStatusEmail("REFUNDED","WT-123","Alice").subject,/refund/);
+ for(const kind of ["PROCESSING","DELIVERED","CANCELLED"] as const)
+  assert.match(buildOrderStatusEmail(kind,"WT-123","Alice").subject,/WT-123/);
 });
