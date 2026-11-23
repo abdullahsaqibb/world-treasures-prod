@@ -9,9 +9,11 @@ export async function GET(request:Request){
   try{service=parseDeliveryService(param);}
   catch{return NextResponse.json({error:"Invalid delivery service"},{status:400,headers:{"Cache-Control":"no-store"}});}
  }
+ // Unvalidated local city membership must never be advertised as coverage.
+ if(service==="LOCAL")return NextResponse.json({cities:[]},{headers:{"Cache-Control":"no-store"}});
  try{
   const now=new Date();
-  const whereRate={active:true,validFrom:{lte:now},OR:[{validUntil:null},{validUntil:{gte:now}}],service:{in:service?[service]:["LOCAL","NATIONAL","STANDARD"]}};
+  const whereRate={active:true,validFrom:{lte:now},OR:[{validUntil:null},{validUntil:{gte:now}}],service:{in:service?[service]:["NATIONAL","STANDARD"]}};
   const cities=await db.city.findMany({
    where:{active:true,rates:{some:whereRate}},
    select:{id:true,name:true,province:true,rates:{where:whereRate,select:{service:true}}},
