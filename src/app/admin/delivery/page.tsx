@@ -1,25 +1,45 @@
-import { ensureAdminPage } from "@/lib/admin-access";
-import { db } from "@/lib/db";
-import { saveDeliveryCity,updateDeliveryRate } from "../actions";
+import {ensureAdminPage} from "@/lib/admin-access";
+import {db} from "@/lib/db";
+import {saveDeliveryService,updateDeliveryRate} from "../actions";
+import {deliveryServiceLabel} from "@/lib/delivery-services";
 export const dynamic="force-dynamic";
 export default async function DeliveryPage(){
  await ensureAdminPage();
- const cities=await db.city.findMany({include:{rates:{where:{service:"STANDARD"},orderBy:{createdAt:"desc"},take:1}},orderBy:[{province:"asc"},{name:"asc"}]});
  const now=new Date();
- const available=cities.filter(c=>c.active&&c.rates.some(rate=>rate.active&&rate.validFrom<=now&&(!rate.validUntil||rate.validUntil>=now))).length;
- const prepared=cities.length-available;
- return <div><span className="wt-eyebrow">Fulfillment & delivery</span><div className="wt-head"><div><h1>Delivery & shipping</h1><p className="wt-lede">Manage city-based delivery prices in South African Rand. Use the figures provided by your courier or delivery partner.</p></div><span className="wt-badge green">{available} enabled cities</span></div>
- <div className="wt-help"><strong>Launch safety:</strong> Create zones with the availability checkbox OFF until courier quotes are confirmed. A city only appears in the public delivery API after its city and current standard rate are both enabled. Payments and orders remain disabled.</div>
- <div className="wt-grid"><div className="wt-stat"><small>Ready for delivery quotes</small><b>{available}</b><span>Active city and current standard rate</span></div><div className="wt-stat"><small>Draft / not active</small><b>{prepared}</b><span>Hidden from public shipping options</span></div></div>
- <div className="wt-2col"><section className="wt-card"><div className="wt-cardhead"><h2>Current delivery zones</h2><span className="wt-badge">{cities.length} cities</span></div>
- {cities.length? <div className="wt-stack">{cities.map(city=>{const rate=city.rates[0];const availableNow=Boolean(city.active&&rate?.active&&rate.validFrom<=now&&(!rate.validUntil||rate.validUntil>=now));return <form className="wt-card" style={{padding:16,marginBottom:0}} key={city.id} action={rate?updateDeliveryRate:saveDeliveryCity}>
- <div className="wt-cardhead"><div><h3>{city.name}</h3><span className="wt-muted">{city.province}</span></div><span className={"wt-badge "+(availableNow?"green":"amber")}>{availableNow?"Published":"Draft / inactive"}</span></div>
- {rate?<input type="hidden" name="rateId" value={rate.id}/>:<><input type="hidden" name="city" value={city.name}/><input type="hidden" name="province" value={city.province}/></>}
- <div className="wt-formgrid"><label className="wt-field">Delivery fee (ZAR)<input type="number" name="feeZar" required min="0" step=".01" defaultValue={rate?(rate.feeCents/100).toFixed(2):""}/></label><div className="wt-field"><span>Availability</span><label className="wt-check"><input type="checkbox" name="active" defaultChecked={availableNow}/> Publish this rate</label></div></div>
- <div className="wt-actions" style={{marginTop:14}}><button type="submit" className="wt-btn light">Save changes</button></div></form>})}</div>:<div className="wt-empty"><h3>No cities configured</h3><p>Add your first delivery zone using the form.</p></div>}</section>
- <section className="wt-card"><h2>Add a delivery city</h2><p className="wt-lede">Prepare a South African city and standard delivery fee. The rate stays private until you explicitly enable it.</p>
- <form action={saveDeliveryCity} className="wt-stack"><label className="wt-field">City<input name="city" required maxLength={100} placeholder="e.g. Johannesburg"/></label><label className="wt-field">Province<input name="province" required maxLength={100} placeholder="e.g. Gauteng"/></label><label className="wt-field">Standard delivery fee (ZAR)<input name="feeZar" type="number" step=".01" min="0" required placeholder="e.g. 75.00"/></label><label className="wt-check"><input name="active" type="checkbox"/> Publish this city and rate (only after verifying the courier fee)</label><button type="submit" className="wt-btn orange">Save delivery city</button></form>
- <div className="wt-help">No placeholder delivery fees will be imported. Rates are managed separately from product prices. Confirm actual coverage and prices with your courier before enabling.</div>
- </section></div></div>;
-
+ const cities=await db.city.findMany({
+  include:{rates:{where:{service:{in:["LOCAL","NATIONAL","STANDARD"]}},orderBy:{createdAt:"desc"}}},
+  orderBy:[{province:"asc"},{name:"asc"}]
+ });
+ const entries=cities.flatMap(city=>{
+  const seen=new Set<string>();
+  return city.rates.filter(rate=>{if(seen.has(rate.service))return false;seen.add(rate.service);return true;}).map(rate=>({
+    city,rate,active:city.active&&rate.active&&rate.validFrom<=now&&(!rate.validUntil||rate.validUntil>=now)
+  }));
+ });
+ const activeLocal=entries.filter(e=>e.active&&e.rate.service==="LOCAL").length;
+ const activeNational=entries.filter(e=>e.active&&e.rate.service==="NATIONAL").length;
+ return <div>
+  <span className="wt-eyebrow">FULFILLMENT / DELIVERY OPTIONS</span>
+  <div className="wt-head"><div><h1>Delivery & shipping</h1><p className="wt-lede">Manage local-store delivery and South African courier coverage independently. Both require real confirmed fees and serviceable destinations.</p></div><span className="wt-badge amber">Checkout disabled</span></div>
+  <div className="wt-help"><strong>Do not invent coverage or prices.</strong> Save delivery destinations as drafts until a courier or local driver confirms fees. A published city is only available for its explicitly enabled service. National courier coverage here is city-based, not a blanket promise to serve every South African postal address.</div>
+  <div className="wt-grid"><div className="wt-stat"><small>Published local destinations</small><b>{activeLocal}</b><span>Served by store delivery</span></div><div className="wt-stat"><small>Published courier destinations</small><b>{activeNational}</b><span>Served by nationwide courier</span></div><div className="wt-stat"><small>Prepared delivery rates</small><b>{entries.filter(x=>!x.active).length}</b><span>Hidden from customers</span></div></div>
+  <div className="wt-2col"><section className="wt-card"><div className="wt-cardhead"><h2>Destination rates</h2><span className="wt-badge">{entries.length} configured</span></div>
+   {entries.length?<div className="wt-stack">{entries.map(({city,rate,active})=><form key={rate.id} action={updateDeliveryRate} className="wt-card" style={{padding:16,marginBottom:0}}>
+    <div className="wt-cardhead"><div><h3>{city.name}, {city.province}</h3><span className="wt-muted">{deliveryServiceLabel(rate.service)}</span></div><span className={"wt-badge "+(active?"green":"amber")}>{active?"Published":"Draft / inactive"}</span></div>
+    <input type="hidden" name="rateId" value={rate.id}/>
+    <div className="wt-formgrid"><label className="wt-field">Delivery fee (ZAR)<input name="feeZar" type="number" required min="0" step=".01" defaultValue={(rate.feeCents/100).toFixed(2)}/></label><div className="wt-field"><span>Availability</span><label className="wt-check"><input name="active" type="checkbox" defaultChecked={active}/> Publish rate</label></div></div>
+    <div className="wt-actions" style={{marginTop:14}}><button type="submit" className="wt-btn light">Save changes</button></div>
+   </form>)}</div>:<div className="wt-empty"><h3>No rates configured</h3><p>Add the first local or courier destination as a draft when the area and fee are confirmed.</p></div>}
+  </section><section className="wt-card"><h2>Add a delivery destination</h2><p className="wt-lede">Create a specific city and its fee for one delivery method. You can add the same city twice with different local and courier rates.</p>
+   <form action={saveDeliveryService} className="wt-stack">
+    <label className="wt-field">Delivery method<select name="service" required defaultValue="LOCAL"><option value="LOCAL">Local delivery from physical store</option><option value="NATIONAL">Nationwide courier delivery</option></select></label>
+    <label className="wt-field">Destination city<input name="city" required maxLength={100} placeholder="Enter confirmed city"/></label>
+    <label className="wt-field">Province<input name="province" required maxLength={100} placeholder="Enter province"/></label>
+    <label className="wt-field">Confirmed delivery fee (ZAR)<input name="feeZar" required type="number" min="0" step=".01" placeholder="Enter actual quote"/></label>
+    <label className="wt-check"><input name="active" type="checkbox"/> Publish this destination and fee immediately</label>
+    <button className="wt-btn orange" type="submit">Save destination</button>
+   </form>
+   <div className="wt-help">Recommended: leave Publish unchecked at first. If shipping refrigerated products, arrange a temperature-controlled service before offering them for courier shipping.</div>
+  </section></div>
+ </div>;
 }
