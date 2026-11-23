@@ -1,9 +1,24 @@
 import Link from "next/link";
+import type {Metadata} from "next";
 import {notFound} from "next/navigation";
 import {getPublishedProduct,zar} from "@/lib/published-catalog";
 import "../catalog.css";
 import ProductGallery from "./ProductGallery";
 export const dynamic="force-dynamic";
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{
+ const {slug}=await params;
+ const product=await getPublishedProduct(slug);
+ if(!product)return {title:"Product not found",robots:{index:false,follow:false}};
+ const description=(product.description?.trim()||("Browse "+product.name+" at World Treasures in Walmer, Gqeberha, South Africa.")).slice(0,155);
+ const relative="/catalog/"+encodeURIComponent(product.slug);
+ const image=product.images.find(i=>/^https:\/\//.test(i.url))?.url;
+ return {
+  title:product.name,description,
+  alternates:{canonical:relative},
+  openGraph:{type:"website",title:product.name+" | World Treasures",description,url:"https://www.worldtreasures.co.za"+relative,...(image?{images:[{url:image,alt:product.name}]}:{})}
+ };
+}
+
 export default async function CatalogDetail({params}:{params:Promise<{slug:string}>}){
  const {slug}=await params;
  const product=await getPublishedProduct(slug);
