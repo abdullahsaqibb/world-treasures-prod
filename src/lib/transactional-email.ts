@@ -27,3 +27,28 @@ export function buildEmailTest(){
  html:"<div style='font-family:Arial,sans-serif;padding:24px;background:#f9f5e9'><h1>World Treasures</h1><p>Your transactional email connection is working.</p><p>This is an administrator test, not a real order or payment confirmation.</p></div>",
  text:"World Treasures email connection test. This is an administrator test, not a real order or payment confirmation."};
 }
+
+/** Standalone previews only: these messages are NOT sent until a trusted
+ * order-status transaction, unique event delivery and recipient guard exist.
+ */
+export type OrderStatusEmailKind="PROCESSING"|"SHIPPED"|"DELIVERED"|"CANCELLED"|"REFUNDED";
+export function buildOrderStatusEmail(kind:OrderStatusEmailKind,orderNumber:string,customerName:string,tracking?:{courier:string;trackingNumber:string;trackingUrl?:string}){
+ if(!/^[a-zA-Z0-9-]{3,80}$/.test(orderNumber))throw new Error("Invalid order number");
+ if(!customerName.trim()||customerName.length>120)throw new Error("Invalid customer name");
+ const states:Record<OrderStatusEmailKind,{subject:string;message:string}>={
+  PROCESSING:{subject:"Your order is being prepared",message:"We are preparing your order and will notify you when it is dispatched."},
+  SHIPPED:{subject:"Your order is on its way",message:"Your order has been handed over for delivery."},
+  DELIVERED:{subject:"Your order has been delivered",message:"Your order has been marked as delivered. Contact the store if you need assistance."},
+  CANCELLED:{subject:"Your order was cancelled",message:"Your order has been cancelled. Any payment or refund will be handled according to the confirmed transaction status."},
+  REFUNDED:{subject:"Your refund has been confirmed",message:"Your order refund has been verified. The time for funds to appear depends on your payment provider."}
+ };
+ const detail=states[kind];
+ if(!detail)throw new Error("Invalid order update");
+ if(kind==="SHIPPED"&&(!tracking?.courier.trim()||!tracking.trackingNumber.trim()))throw new Error("Shipping confirmation requires real tracking information");
+ const trackingText=kind==="SHIPPED"? "Courier: "+tracking!.courier+"\nTracking reference: "+tracking!.trackingNumber+(tracking!.trackingUrl?"\nTracking link: "+tracking!.trackingUrl:""):"";
+ const message=detail.message+"\n"+trackingText;
+ const subject="World Treasures · "+detail.subject+" · "+orderNumber;
+ const text="Hi "+customerName+",\n\n"+detail.message+"\n"+trackingText+"\n\nOrder: "+orderNumber+"\nWorld Treasures";
+ const html="<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px;color:#24271f\"><h1>WORLD TREASURES</h1><h2>"+escapeHtml(detail.subject)+"</h2><p>Hi "+escapeHtml(customerName)+",</p><p>"+escapeHtml(detail.message)+"</p>"+(trackingText?"<p style=\"white-space:pre-line\">"+escapeHtml(trackingText)+"</p>":"")+"<p>Order: "+escapeHtml(orderNumber)+"</p><p>World Treasures</p></div>";
+ return {subject,html,text};
+}
