@@ -62,6 +62,7 @@ export async function saveDeliveryService(form:FormData){
  const normalizedName=name.toLocaleLowerCase("en-ZA").replace(/\s+/g," ");
  const feeCents=money(form.get("feeZar"));
  const publish=form.get("active")==="on";
+ if(service==="LOCAL"&&publish)throw new Error("Local delivery requires verified address-distance checking before publication");
  await db.$transaction(async tx=>{
   const city=await tx.city.upsert({
    where:{province_normalizedName:{province,normalizedName}},
@@ -81,8 +82,9 @@ export async function updateDeliveryRate(form:FormData){
  const feeCents=money(form.get("feeZar"));
  const active=form.get("active")==="on";
  await db.$transaction(async tx=>{
-  const rate=await tx.shippingRate.findUnique({where:{id:rateId},select:{cityId:true}});
+  const rate=await tx.shippingRate.findUnique({where:{id:rateId},select:{cityId:true,service:true}});
   if(!rate)throw new Error("Invalid delivery rate");
+  if(active&&rate.service==="LOCAL")throw new Error("Local delivery requires verified address-distance checking before publication");
   await tx.shippingRate.update({where:{id:rateId},data:{feeCents,active}});
   // A draft city remains hidden until its first rate is explicitly enabled.
   // Enabling a previously drafted rate must also enable the parent city.
