@@ -50,15 +50,22 @@ export async function saveDeliveryCity(form:FormData){
  const old=await db.shippingRate.findFirst({where:{cityId:city.id,service:"STANDARD",courier:null},orderBy:{createdAt:"desc"}});
  if(old){await db.shippingRate.update({where:{id:old.id},data:{feeCents,active}});}
  else{await db.shippingRate.create({data:{cityId:city.id,feeCents,active,service:"STANDARD"}});}
- revalidatePath("/admin/delivery");
+ revalidatePath("/admin/delivery");revalidatePath("/admin/readiness");
 }
 export async function updateDeliveryRate(form:FormData){
  await requireAdmin();
  const rateId=clean(form.get("rateId"),128);
  const feeCents=money(form.get("feeZar"));
  const active=form.get("active")==="on";
- await db.shippingRate.update({where:{id:rateId},data:{feeCents,active}});
- revalidatePath("/admin/delivery");
+ await db.$transaction(async tx=>{
+  const rate=await tx.shippingRate.findUnique({where:{id:rateId},select:{cityId:true}});
+  if(!rate)throw new Error("Invalid delivery rate");
+  await tx.shippingRate.update({where:{id:rateId},data:{feeCents,active}});
+  // A draft city remains hidden until its first rate is explicitly enabled.
+  // Enabling a previously drafted rate must also enable the parent city.
+  if(active)await tx.city.update({where:{id:rate.cityId},data:{active:true}});
+ });
+ revalidatePath("/admin/delivery");revalidatePath("/admin/readiness");
 }
 
 export async function createCatalogProduct(form:FormData){
