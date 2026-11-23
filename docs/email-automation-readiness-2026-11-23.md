@@ -20,12 +20,18 @@ owner-reported verification, not proof of full customer delivery on every route.
   CUSTOMER_EMAIL_DELIVERY_ENABLED=true. It does NOT have callers or auto-send.
 - Tests for fail-closed behavior, malformed inputs and provider idempotency headers.
 
+## Implemented but not activated
+- Prisma NotificationOutbox model, unique event key, delivery status and reviewed SQL migration file.
+- Transactional queue insertion helper and server-side dispatch function with guarded claims,
+  bounded retries and stale-send reconciliation detection.
+- No migration has been applied to production; no scheduled delivery worker or customer-event trigger is active.
+
 ## Still mandatory before activation
-1. Durable event/outbox table with unique event keys, retries and delivery state.
-2. Verified event producers for persisted orders, validated PayFast ITN,
+1. Review/apply the outbox migration to an isolated development database, then test concurrency.
+2. Add verified event producers for persistent orders, validated PayFast ITN,
    authenticated account actions and confirmed fulfillment.
-3. Connect provider sending to outbox jobs with per-event recipient authorization,
-   rate limiting, logging and safe retries.
+3. Attach an authenticated scheduler to the worker with delivery observability,
+   per-event recipient authorization, rate limiting and safe operational recovery.
 4. Run realistic sandbox end-to-end tests, inspect delivery logs and suppress
    duplicates; enable the customer delivery switch only after sign-off.
 5. Follow business retention and privacy requirements for customer emails.
