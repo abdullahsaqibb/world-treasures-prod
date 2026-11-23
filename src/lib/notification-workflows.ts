@@ -52,3 +52,27 @@ export function buildOrderLifecyclePreview(kind:NotificationKind,details:OrderEm
   default:throw new Error("Notification requires a separate verified account or consent workflow");
  }
 }
+
+/** Email links are created only by the future verified customer-account flow. */
+export function buildAccountActionNotice(kind:"ACCOUNT_VERIFICATION"|"PASSWORD_RESET",customerName:string,actionUrl:string){
+ const name=safeName(customerName);
+ const url=new URL(actionUrl);
+ if(url.protocol!=="https:"||url.host!=="www.worldtreasures.co.za"||
+  (kind==="ACCOUNT_VERIFICATION"?!url.pathname.startsWith("/account/verify"):!url.pathname.startsWith("/account/reset")))
+  throw new Error("Invalid account action URL");
+ const heading=kind==="ACCOUNT_VERIFICATION"?"Verify your email address":"Reset your password";
+ const message=kind==="ACCOUNT_VERIFICATION"?"Please verify your email address using the secure link below.":"A password reset was requested for your account. Ignore this message if you did not request it.";
+ const link=url.toString();
+ const content=layout(heading,name,message);
+ return {
+  subject:"World Treasures · "+heading,
+  text:content.text+"\n\n"+link,
+  html:content.html.replace("</main>","<p><a href=\""+escapeHtml(link)+"\">"+escapeHtml(heading)+"</a></p></main>")
+ };
+}
+/** Marketing reminders are NEVER sent for a mere add-to-basket click. */
+export function buildCartReminderNotice(customerName:string,hasOptedIn:boolean){
+ if(!hasOptedIn)throw new Error("Cart reminders require documented marketing consent");
+ const name=safeName(customerName);
+ return {subject:"Your World Treasures bag is waiting",...layout("Something caught your eye?",name,"If you still want to browse your saved bag, visit World Treasures. Online checkout may not yet be available.")};
+}
