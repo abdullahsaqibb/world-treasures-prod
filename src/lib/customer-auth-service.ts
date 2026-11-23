@@ -1,7 +1,9 @@
 import {db} from "./db";
+import {buildAccountActionNotice} from "./notification-workflows";
+import {queueVerifiedNotification} from "./notification-outbox";
 import {
  createCustomerToken,hashCustomerToken,normalizedCustomerEmail,
- customerChallengeExpiry,customerSessionExpiry
+ customerChallengeExpiry,customerSessionExpiry,customerSignInUrl
 } from "./customer-auth-tokens";
 
 /**
@@ -56,4 +58,35 @@ export async function findActiveCustomerSession(token:string,now=new Date()){
 export async function revokeCustomerSession(token:string){
  const tokenHash=hashCustomerToken(token);
  await db.customerSession.updateMany({where:{tokenHash,revokedAt:null},data:{revokedAt:new Date()}});
+}
+
+/**
+ * Prepare a real one-time sign-in notification in the SAME transaction as its
+ * challenge. No email is sent here: the disabled-by-default outbox worker handles
+ * actual delivery once separately authorized and tested.
+ *
+ * Do not expose as a public endpoint until distributed throttling, enumeration
+ * safeguards, abuse controls, and cookie-based verification are implemented.
+ */
+export async function prepareCustomerLoginEmail(emailInput:string,now=new Date()){
+ if(process.env.CUSTOMER_ACCOUNTS_ENABLED!=="true")
+  throw new Error("Customer accounts are not enabled");
+ const email=normalizedCustomerEmail(emailInput);
+ const token=createCustomerToken();
+ const notice=buildAccountActionNotice("ACCOUNT_VERIFICATION","Customer",customerSignInUrl(token));
+ await db.$transaction(async tx=>{
+  const challenge=await tx.customerLoginChallenge.create({
+   data:{email,tokenHash:hashCustomerToken(token),expiresAt:customerChallengeExpiry(now)}
+  });
+  await queueVerifiedNotification(tx,{
+   eventKey:"login:"+challenge.id,
+   kind:"ACCOUNT_VERIFICATION",
+   recipient:email,
+   subject:notice.subject,
+   html:notice.html,
+   text:notice.text
+  },true);
+ });
+ // Never return the raw token or provider data to a public request handler.
+ return {queued:true};
 }
