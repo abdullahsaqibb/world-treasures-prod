@@ -1,5 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
+import {customerAccountOrigin} from "../src/lib/customer-account-origin";
 import {buildOrderPlacedNotice,buildWelcomeNotice,buildOrderLifecyclePreview,buildAccountActionNotice,buildCartReminderNotice,notificationCatalog} from "../src/lib/notification-workflows";
 test("all customer email events have explicit source requirements",()=>{
  assert.equal(notificationCatalog.length,11);
@@ -29,14 +30,14 @@ test("transactional preview adapter does not send and guards unsupported events"
 });
 
 test("account verification and password reset URLs stay on the store domain",()=>{
- const verify=buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex","https://www.worldtreasures.co.za/account/verify?token=abc123");
+ const verify=buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex",customerAccountOrigin()+"/account/verify?token=abc123");
  assert.match(verify.text,/account\/verify/);
- const reset=buildAccountActionNotice("PASSWORD_RESET","Alex","https://www.worldtreasures.co.za/account/reset?token=xyz");
+ const reset=buildAccountActionNotice("PASSWORD_RESET","Alex",customerAccountOrigin()+"/account/reset?token=xyz");
  assert.match(reset.subject,/Reset your password/);
  assert.throws(()=>buildAccountActionNotice("PASSWORD_RESET","Alex","https://evil.example/account/reset?token=x"),/Invalid/);
  assert.throws(()=>buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex","http://www.worldtreasures.co.za/account/verify"),/Invalid/);
- assert.throws(()=>buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex","https://www.worldtreasures.co.za/account/verify-malicious?token=x"),/Invalid/);
- assert.throws(()=>buildAccountActionNotice("PASSWORD_RESET","Alex","https://www.worldtreasures.co.za/account/reset-extra?token=x"),/Invalid/);
+ assert.throws(()=>buildAccountActionNotice("ACCOUNT_VERIFICATION","Alex",customerAccountOrigin()+"/account/verify-malicious?token=x"),/Invalid/);
+ assert.throws(()=>buildAccountActionNotice("PASSWORD_RESET","Alex",customerAccountOrigin()+"/account/reset-extra?token=x"),/Invalid/);
 });
 test("cart reminder requires marketing consent and cannot send from basket action alone",()=>{
  assert.throws(()=>buildCartReminderNotice("Alex",false),/consent/);

@@ -43,6 +43,7 @@ model User {
  createdAt DateTime @default(now())
  addresses Address[]
  orders Order[]
+ customerSessions CustomerSession[]
 }
 model Address {
  id String @id @default(cuid())
@@ -145,6 +146,9 @@ model Order {
  subtotalCents Int
  totalCents Int
  addressSnapshot Json
+ trackingCourier String?
+ trackingNumber String?
+ trackingUrl String?
  items OrderItem[]
  payments Payment[]
  createdAt DateTime @default(now())
@@ -155,6 +159,7 @@ model OrderItem {
  orderId String
  order Order @relation(fields:[orderId],references:[id])
  sku String
+ variantId String?
  productName String
  quantity Int
  unitPriceCents Int
@@ -194,4 +199,52 @@ model AdminLoginAttempt {
  key String @id
  attempts Int @default(0)
  windowStart DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/** Durable notification outbox. Events only enter through verified server workflows. */
+enum NotificationDeliveryStatus {
+ PENDING
+ PROCESSING
+ SENT
+ FAILED
+}
+model NotificationOutbox {
+ id String @id @default(cuid())
+ eventKey String @unique
+ kind String
+ recipient String
+ subject String
+ html String @db.Text
+ text String @db.Text
+ status NotificationDeliveryStatus @default(PENDING)
+ attempts Int @default(0)
+ nextAttemptAt DateTime @default(now())
+ lockedAt DateTime?
+ providerId String?
+ lastError String?
+ createdAt DateTime @default(now())
+ sentAt DateTime?
+ @@index([status,nextAttemptAt])
+}
+
+/** Passwordless customer identity, separate from owner/admin Auth.js. */
+model CustomerLoginChallenge {
+ id String @id @default(cuid())
+ email String
+ tokenHash String @unique
+ expiresAt DateTime
+ consumedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([email,createdAt])
+ @@index([expiresAt])
+}
+model CustomerSession {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ tokenHash String @unique
+ expiresAt DateTime
+ revokedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([userId,expiresAt])
 }

@@ -35,6 +35,7 @@ export function CartExperience({products,recoveredPreview=[]}:{products:Product[
  const [addressLine2,setAddressLine2]=useState("");
  const [postalCode,setPostalCode]=useState("");
  const [cityId,setCityId]=useState("");
+ const [guestCity,setGuestCity]=useState("");
  const [cities,setCities]=useState<DeliveryCity[]>([]);
  const [shippingCents,setShippingCents]=useState<number|null>(null);
  const [deliveryError,setDeliveryError]=useState("");
@@ -151,11 +152,11 @@ export function CartExperience({products,recoveredPreview=[]}:{products:Product[
   <aside className="order-summary wt-bag-order-summary" aria-label="Order summary">
    <h3>ORDER SUMMARY</h3>
    <div className="wt-bag-summary-row"><span>Subtotal</span><strong>{zar(total)}</strong></div>
-   <p>Delivery calculated at checkout.<br/>Store collection is free.</p>
+   <p>Delivery and collection charges will be confirmed before real checkout is enabled.</p>
    <p className="wt-bag-delivery-note">Delivery rates are confirmed during checkout.</p>
-   <button className="wt-cart-primary" type="button" disabled aria-disabled="true" title="Online checkout will open after delivery and payments are verified">Checkout coming soon</button>
+   <button className="wt-cart-primary" type="button" onClick={startCheckout} title="Review your checkout details. Payments remain unavailable.">Review checkout →</button>
    <div className="wt-bag-payfast"><strong>Payment placeholder</strong><small>Payments are not enabled</small></div>
-   <p className="wt-cart-disclaimer">Browse-only preview: no checkout, order or payment can be submitted.</p>
+   <p className="wt-cart-disclaimer">Browse-only preview: you may review checkout details, but no order or payment can be submitted.</p>
    <div className="wt-cart-bag-bottom">
     <p className="wt-cart-bag-label">YOUR ORDER, PACKED TOGETHER</p>
     <button type="button" className="wt-cart-basket-toggle wt-cart-bag-basket" aria-label="Open the products inside your basket" aria-expanded={expanded} onClick={()=>setExpanded(true)}>
@@ -175,7 +176,7 @@ export function CartExperience({products,recoveredPreview=[]}:{products:Product[
  {expanded&&basketDetails}
  <div className="wt-cart-total"><span>Products subtotal</span><strong>{zar(total)}</strong></div>
  {step==="bag"&&<><button className="wt-cart-primary" onClick={()=>setStep("delivery")} disabled={!count}>Continue to delivery →</button><button className="wt-cart-secondary" onClick={()=>{setCheckoutOpen(false);setBagOpen(true)}}>← Edit your bag</button></>}
- {step==="delivery"&&<form className="wt-cart-step wt-checkout-guest" onSubmit={e=>{e.preventDefault();if(!e.currentTarget.reportValidity())return;if(shippingCents===null){setDeliveryError("Select a city with an available delivery rate.");return;}setStep("payment");}}>
+ {step==="delivery"&&<form className="wt-cart-step wt-checkout-guest" onSubmit={e=>{e.preventDefault();if(!e.currentTarget.reportValidity())return;setStep("payment");}}>
   <h3>Guest checkout preview</h3><p>You can review delivery without creating an account. No details are sent to the server or saved as an order.</p>
   <label>Your name<input type="text" autoComplete="name" required maxLength={120} value={guestName} onChange={e=>setGuestName(e.target.value)} placeholder="Full name"/></label>
   <label>Email address<input type="email" autoComplete="email" required maxLength={254} value={guestEmail} onChange={e=>setGuestEmail(e.target.value)} placeholder="name@example.com"/></label>
@@ -183,13 +184,13 @@ export function CartExperience({products,recoveredPreview=[]}:{products:Product[
   <label>Street address<input type="text" autoComplete="address-line1" required maxLength={200} value={addressLine1} onChange={e=>setAddressLine1(e.target.value)} placeholder="Street address"/></label>
   <label>Apartment or unit (optional)<input type="text" autoComplete="address-line2" maxLength={200} value={addressLine2} onChange={e=>setAddressLine2(e.target.value)} placeholder="Unit, floor or building"/></label>
   <label>Postal code<input type="text" autoComplete="postal-code" required maxLength={12} value={postalCode} onChange={e=>setPostalCode(e.target.value)} placeholder="Postal code"/></label>
-  <label>Delivery city<select value={cityId} required onChange={e=>setCityId(e.target.value)}><option value="">Choose city</option>{cities.map(city=><option key={city.id} value={city.id}>{city.name}, {city.province}</option>)}</select></label>
-  {shippingCents!==null&&<p role="status">Standard delivery preview: <strong>{zar(shippingCents)}</strong></p>}
+  {cities.length?<label>Delivery city<select value={cityId} required onChange={e=>setCityId(e.target.value)}><option value="">Choose city</option>{cities.map(city=><option key={city.id} value={city.id}>{city.name}, {city.province}</option>)}</select></label>:<label>Delivery city<input type="text" required maxLength={100} value={guestCity} onChange={e=>setGuestCity(e.target.value)} placeholder="Enter your city (quote unavailable)"/></label>}
+  {shippingCents!==null?<p role="status">Standard delivery preview: <strong>{zar(shippingCents)}</strong></p>:<p role="status">Delivery fee is not confirmed yet. No charge can be placed from this preview.</p>}
   {deliveryError&&<p role="alert">{deliveryError}</p>}
   <button className="wt-cart-primary" type="submit">Review payment placeholder →</button>
   <button className="wt-cart-secondary" type="button" onClick={()=>setStep("bag")}>← Back to bag</button>
  </form>}
- {step==="payment"&&<div className="wt-cart-step"><h3>Payment is not enabled</h3><p>Your guest details remain only in this browser session. No order has been placed, no email has been sent, and no payment has been collected.</p><div className="wt-cart-total"><span>Items</span><strong>{zar(total)}</strong></div>{shippingCents!==null&&<div className="wt-cart-total"><span>Delivery estimate</span><strong>{zar(shippingCents)}</strong></div>}<div className="wt-cart-total"><span>Estimated total</span><strong>{zar(total+(shippingCents??0))}</strong></div><button type="button" className="wt-cart-primary" disabled>Payments coming soon — unavailable</button><button className="wt-cart-secondary" onClick={()=>setStep("delivery")}>← Back to delivery</button></div>}
+ {step==="payment"&&<div className="wt-cart-step"><h3>Payment is not enabled</h3><p>Your guest details remain only in this browser session. No order has been placed, no email has been sent, and no payment has been collected.</p><div className="wt-cart-total"><span>Items</span><strong>{zar(total)}</strong></div>{shippingCents!==null&&<div className="wt-cart-total"><span>Delivery estimate</span><strong>{zar(shippingCents)}</strong></div>}<div className="wt-cart-total"><span>{shippingCents===null?"Subtotal only — delivery pending":"Estimated total"}</span><strong>{zar(total+(shippingCents??0))}</strong></div><button type="button" className="wt-cart-primary" disabled>Payments coming soon — unavailable</button><button className="wt-cart-secondary" onClick={()=>setStep("delivery")}>← Back to delivery</button></div>}
  </div>;
  if(!mounted)return null;
  return <>{targets.grid&&createPortal(productsGrid,targets.grid)}{targets.arrivals&&createPortal(arrivalsCards,targets.arrivals)}{targets.filters&&createPortal(filters,targets.filters)}{targets.contents&&createPortal(bagContents,targets.contents)}{targets.checkout&&createPortal(checkoutContents,targets.checkout)}
