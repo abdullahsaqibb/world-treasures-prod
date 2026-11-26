@@ -4,6 +4,7 @@ import {
  normalizedCustomerEmail,createCustomerToken,hashCustomerToken,
  customerChallengeExpiry,customerSessionExpiry,customerSignInUrl
 } from "../src/lib/customer-auth-tokens";
+import {customerAccountOrigin} from "../src/lib/customer-account-origin";
 test("customer email normalization rejects malformed addresses",()=>{
  assert.equal(normalizedCustomerEmail("  Alex@Example.COM  "),"alex@example.com");
  assert.throws(()=>normalizedCustomerEmail("not-an-email"),/Invalid/);
@@ -24,7 +25,7 @@ test("login and session expiries are bounded independently",()=>{
 });
 test("verification links are anchored to the verified store domain",()=>{
  const token=createCustomerToken(),url=new URL(customerSignInUrl(token));
- assert.equal(url.origin,"https://www.worldtreasures.co.za");
+ assert.equal(url.origin,customerAccountOrigin());
  assert.equal(url.pathname,"/account/verify");
  assert.equal(url.searchParams.get("token"),token);
 });
