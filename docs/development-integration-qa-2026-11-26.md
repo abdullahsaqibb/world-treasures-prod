@@ -78,3 +78,41 @@ verified that no test records remained afterward.
   notification outbox events (all counts 0).
 - Remaining untested: full email-link POST login flow, actual provider delivery,
   signed-in browsing, notification worker retries and paid order lifecycle.
+
+## Additional QA performed later on 26 Nov — latest preview
+- Deployed preview commit 7f23b6f (Vercel deployment dpl_CoWLSsAUrAjFbQZePDJjRXwXxvAZ) reached READY.
+- GET /api/health/database returned HTTP 200:
+  database=reachable, schema=initialized, isolation=development_verified,
+  customerAccountsEnabled=false, customerMailEnabled=false,
+  trustedProxyAddressAvailable=true.
+- Notification worker SQL state machine tested in a Neon development SAVEPOINT:
+  first claim 1; competing claim 0; failure advances to retry state;
+  retry before nextAttemptAt claims 0; retry after due claims 1;
+  marked SENT; later claims 0. Test row rolled back (0 remaining).
+- CustomerSession auth state tested with synthetic development user:
+  active session before logout 1; after revocation 0.
+  Both session and user rolled back (0 remaining).
+- Database-backed login throttling counters incremented 1,2,3 in development
+  and the synthetic throttle row was rolled back (0 remaining).
+- Browser POST verification with real magic link was not exercised; the
+  public customer email feature flags remain disabled. The environment
+  connector confirms production Resend variables exist but does not expose
+  secret values; it cannot configure a Preview sender without the account
+  owner providing a preview-scoped credential in Vercel settings.
+- No real email sent, no real order paid or placed, no production changes.
+
+## Required for full email and account browser verification
+1. In Vercel Project Settings → Environment Variables, set the verified
+   RESEND_API_KEY and TRANSACTIONAL_EMAIL_FROM for Preview, preferably
+   constrained to feature/transactional-email-foundation-20261123. Use a
+   narrowly scoped credential, an approved sender and a test inbox.
+   Never paste these credentials into the repository or chat.
+2. Configure CUSTOMER_ACCOUNTS_ENABLED=true and
+   CUSTOMER_EMAIL_DELIVERY_ENABLED=true for that preview branch only,
+   after confirming health isolation is development_verified.
+3. Redeploy Preview and run authenticated POST request/verification/logout
+   browser tests, confirming mailbox receipt, cookie security, session
+   revocation, retries and abuse protection. Re-disable flags after QA
+   unless explicitly approved for a preview demo.
+4. Keep production customer email and accounts disabled until owner
+   explicitly authorizes the complete release.
