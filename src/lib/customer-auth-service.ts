@@ -1,6 +1,6 @@
 import {db} from "./db";
 import {buildAccountActionNotice} from "./notification-workflows";
-import {queueVerifiedNotification} from "./notification-outbox";
+import {sendCustomerTransactionalEmail} from "./customer-email-transport";
 import {
  createCustomerToken,hashCustomerToken,normalizedCustomerEmail,
  customerChallengeExpiry,customerSessionExpiry,customerSignInUrl
@@ -61,32 +61,34 @@ export async function revokeCustomerSession(token:string){
 }
 
 /**
- * Prepare a real one-time sign-in notification in the SAME transaction as its
- * challenge. No email is sent here: the disabled-by-default outbox worker handles
- * actual delivery once separately authorized and tested.
- *
- * Do not expose as a public endpoint until distributed throttling, enumeration
- * safeguards, abuse controls, and cookie-based verification are implemented.
+ * Authentication tokens are NEVER placed in the durable email outbox because
+ * that would store bearer credentials in plaintext in its HTML/text columns.
+ * Persist a hashed one-time challenge first, then deliver directly through
+ * Resend with a stable provider idempotency key. Rate-limit the caller.
  */
 export async function prepareCustomerLoginEmail(emailInput:string,now=new Date()){
- if(process.env.CUSTOMER_ACCOUNTS_ENABLED!=="true")
-  throw new Error("Customer accounts are not enabled");
+ if(process.env.CUSTOMER_ACCOUNTS_ENABLED!=="true"||
+    process.env.CUSTOMER_EMAIL_DELIVERY_ENABLED!=="true")
+  throw new Error("Customer account email sign-in is not enabled");
  const email=normalizedCustomerEmail(emailInput);
  const token=createCustomerToken();
  const notice=buildAccountActionNotice("ACCOUNT_VERIFICATION","Customer",customerSignInUrl(token));
- await db.$transaction(async tx=>{
-  const challenge=await tx.customerLoginChallenge.create({
-   data:{email,tokenHash:hashCustomerToken(token),expiresAt:customerChallengeExpiry(now)}
-  });
-  await queueVerifiedNotification(tx,{
-   eventKey:"login:"+challenge.id,
-   kind:"ACCOUNT_VERIFICATION",
-   recipient:email,
-   subject:notice.subject,
-   html:notice.html,
-   text:notice.text
-  },true);
+ const challenge=await db.customerLoginChallenge.create({
+  data:{email,tokenHash:hashCustomerToken(token),expiresAt:customerChallengeExpiry(now)}
  });
- // Never return the raw token or provider data to a public request handler.
- return {queued:true};
+ try{
+  await sendCustomerTransactionalEmail({
+   eventKey:"login:"+challenge.id,recipient:email,
+   subject:notice.subject,html:notice.html,text:notice.text
+  },{verifiedEvent:true});
+ }catch{
+  // An unsent, stored challenge must not linger as an active login link.
+  // Even an ambiguous provider timeout cannot create an unauthorized session.
+  await db.customerLoginChallenge.updateMany({
+   where:{id:challenge.id,consumedAt:null},
+   data:{expiresAt:now}
+  });
+  throw new Error("Customer sign-in email could not be delivered");
+ }
+ return {queued:false,sent:true};
 }
