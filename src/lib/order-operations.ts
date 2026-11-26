@@ -1,4 +1,5 @@
 import {db} from "./db";
+import {requireIsolatedPreviewDatabase} from "./preview-database-guard";
 import {nextOrderState,type OrderLifecycleEvent} from "./order-lifecycle";
 import {queueVerifiedNotification} from "./notification-outbox";
 import {buildOrderLifecyclePreview} from "./notification-workflows";
@@ -28,6 +29,7 @@ export function validateOrderAction(event:string,tracking?:Tracking):AdminOrderA
  * No public checkout or payment step calls this.
  */
 export async function applyAdminOrderAction(orderId:string,eventInput:string,tracking?:Tracking){
+ await requireIsolatedPreviewDatabase();
  if(process.env.ORDER_OPERATIONS_ENABLED!=="true")throw new Error("Order management actions are not enabled");
  if(!orderId||orderId.length>128)throw new Error("Invalid order");
  const event=validateOrderAction(eventInput,tracking);
