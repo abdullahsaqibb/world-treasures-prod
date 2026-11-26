@@ -1,4 +1,5 @@
 import {db} from "./db";
+import {requireIsolatedPreviewDatabase} from "./preview-database-guard";
 import {buildAccountActionNotice} from "./notification-workflows";
 import {sendCustomerTransactionalEmail} from "./customer-email-transport";
 import {
@@ -12,6 +13,7 @@ import {
  * non-enumerating responses, transactional email and secure cookie endpoints.
  */
 export async function createCustomerSignInChallenge(emailInput:string,now=new Date()){
+ await requireIsolatedPreviewDatabase();
  const email=normalizedCustomerEmail(emailInput);
  const rawToken=createCustomerToken();
  await db.customerLoginChallenge.create({
@@ -22,6 +24,7 @@ export async function createCustomerSignInChallenge(emailInput:string,now=new Da
 
 /** Consumes the token atomically with the user/session write. One token cannot be replayed. */
 export async function consumeCustomerSignInChallenge(token:string,now=new Date()){
+ await requireIsolatedPreviewDatabase();
  const tokenHash=hashCustomerToken(token);
  const sessionToken=createCustomerToken();
  const sessionHash=hashCustomerToken(sessionToken);
@@ -56,6 +59,7 @@ export async function findActiveCustomerSession(token:string,now=new Date()){
  return {id:session.user.id,email:session.user.email};
 }
 export async function revokeCustomerSession(token:string){
+ await requireIsolatedPreviewDatabase();
  const tokenHash=hashCustomerToken(token);
  await db.customerSession.updateMany({where:{tokenHash,revokedAt:null},data:{revokedAt:new Date()}});
 }
@@ -67,6 +71,7 @@ export async function revokeCustomerSession(token:string){
  * Resend with a stable provider idempotency key. Rate-limit the caller.
  */
 export async function prepareCustomerLoginEmail(emailInput:string,now=new Date()){
+ await requireIsolatedPreviewDatabase();
  if(process.env.CUSTOMER_ACCOUNTS_ENABLED!=="true"||
     process.env.CUSTOMER_EMAIL_DELIVERY_ENABLED!=="true")
   throw new Error("Customer account email sign-in is not enabled");
