@@ -1,4 +1,4 @@
-import {Prisma,type NotificationOutbox} from "@prisma/client";
+import {type Prisma,type NotificationOutbox} from "@prisma/client";
 import {db} from "./db";
 import {sendCustomerTransactionalEmail,customerEmailTransportReady} from "./customer-email-transport";
 
@@ -18,13 +18,8 @@ export async function queueVerifiedNotification(
  if(!/^[A-Za-z0-9][A-Za-z0-9:_-]{7,127}$/.test(message.eventKey))throw new Error("Invalid event key");
  if(!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(message.recipient))throw new Error("Invalid recipient");
  if(!message.kind||!message.subject.trim()||!message.html.trim()||!message.text.trim())throw new Error("Incomplete notification");
- try{
-  await tx.notificationOutbox.create({data:message});
-  return {created:true};
- }catch(error){
-  if(error instanceof Prisma.PrismaClientKnownRequestError&&error.code==="P2002")return {created:false};
-  throw error;
- }
+ const result=await tx.notificationOutbox.createMany({data:[message],skipDuplicates:true});
+ return {created:result.count===1};
 }
 
 export function retryDelayMs(attempt:number):number{
