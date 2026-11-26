@@ -55,3 +55,26 @@ verified that no test records remained afterward.
 5. Verify email worker delivery/retries, delivery logs and no duplicate
    sending on timeout. Enable CRON_SECRET only when reviewed.
 6. Proceed to controlled production promotion only after a complete QA report.
+
+## Follow-up: running Preview and concurrency verified
+- Used Vercel's authenticated deployment fetch on the existing READY preview
+  dpl_6vdM5A53fhQ9vruY2Y22HaCzTzc7.
+- GET /api/health/database returned HTTP 200 with
+  {database: reachable, schema: initialized, isolation: development_verified}.
+- GET /account/login returned HTTP 200 with a safe disabled-account message,
+  no active sign-in request form; GET /account/verify without a token displayed
+  the invalid/incomplete link message.
+- GET /api/customer/auth/request correctly returned 405 (POST only).
+- GET /account rendered the login page to an anonymous user, with no order
+  history displayed.
+- Real preview Resend sending remains disabled; credentials are scoped to
+  Production only. A test-specific Preview sender must be set up and approved
+  for live email testing. No customer email was sent.
+- Concurrency probe: inserted temporary test-only inventory in Neon developmentt
+  with onHand=5, then issued two independent concurrent guarded reservations
+  for 4 units. Exactly one returned 1 affected row; the other returned 0.
+  Test entities were cleaned up; subsequent checks showed zero QA inventory.
+- Rechecked development branch: no pending magic-link challenges, sessions or
+  notification outbox events (all counts 0).
+- Remaining untested: full email-link POST login flow, actual provider delivery,
+  signed-in browsing, notification worker retries and paid order lifecycle.
