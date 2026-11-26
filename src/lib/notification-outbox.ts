@@ -1,5 +1,6 @@
 import {type Prisma,type NotificationOutbox} from "@prisma/client";
 import {db} from "./db";
+import {requireIsolatedPreviewDatabase} from "./preview-database-guard";
 import {sendCustomerTransactionalEmail,customerEmailTransportReady} from "./customer-email-transport";
 
 type QueueClient=Pick<Prisma.TransactionClient,"notificationOutbox">;
@@ -31,6 +32,7 @@ export type DispatchSummary={claimed:number;sent:number;failed:number;disabled:b
  * after deployment isolation, audited authorization and acceptance testing.
  */
 export async function dispatchPendingNotifications(maxBatch=10):Promise<DispatchSummary>{
+ await requireIsolatedPreviewDatabase();
  if(!customerEmailTransportReady())return {claimed:0,sent:0,failed:0,disabled:true};
  const now=new Date();
  const candidates=await db.notificationOutbox.findMany({
