@@ -20,9 +20,17 @@ export async function GET() {
         WHERE table_schema = 'public' AND table_name = 'Product'
       ) AS present
     `;
+    // Read-only check against the known isolated World Treasures development branch.
+    // Fail closed if this preview is pointed at production or another branch.
+    const identity = await db.$queryRaw<Array<{ branch: string | null }>>`
+      SELECT current_setting('neon.branch_id', true) AS branch
+    `;
+    const isolatedDevelopment = identity[0]?.branch === "br-blue-surf-beydnbqx";
     return NextResponse.json(
-      { database: "reachable", schema: tables[0]?.present ? "initialized" : "not_initialized" },
-      { headers: { "Cache-Control": "no-store" } }
+      { database: "reachable", schema: tables[0]?.present ? "initialized" : "not_initialized",
+        isolation: isolatedDevelopment ? "development_verified" : "unexpected_database" },
+      { status: isolatedDevelopment ? 200 : 503,
+        headers: { "Cache-Control": "no-store" } }
     );
   } catch {
     return NextResponse.json({ database: "unreachable" }, { status: 503 });
