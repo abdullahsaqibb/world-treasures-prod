@@ -1,5 +1,6 @@
 import {createHmac} from "node:crypto";
 import {db} from "./db";
+import {requireIsolatedPreviewDatabase} from "./preview-database-guard";
 
 /** Fail closed if a trusted proxy address, AUTH_SECRET or shared DB is absent. */
 function hashedKey(label:string,value:string):string{
@@ -13,6 +14,7 @@ export function customerThrottleKeys(email:string,ip:string){
 }
 export async function allowCustomerSignInRequest(email:string,request:Request):Promise<boolean>{
  try{
+  await requireIsolatedPreviewDatabase();
   // Never trust a client-controlled x-forwarded-for value for security decisions.
   // Vercel injects x-vercel-forwarded-for at its trusted proxy boundary.
   const ip=request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim()||"";
