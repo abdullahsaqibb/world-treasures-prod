@@ -146,6 +146,9 @@ model Order {
  subtotalCents Int
  totalCents Int
  addressSnapshot Json
+ trackingCourier String?
+ trackingNumber String?
+ trackingUrl String?
  items OrderItem[]
  payments Payment[]
  createdAt DateTime @default(now())
@@ -156,6 +159,7 @@ model OrderItem {
  orderId String
  order Order @relation(fields:[orderId],references:[id])
  sku String
+ variantId String?
  productName String
  quantity Int
  unitPriceCents Int
