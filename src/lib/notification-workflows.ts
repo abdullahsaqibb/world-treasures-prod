@@ -1,4 +1,5 @@
 import {buildPaidOrderEmail,buildOrderStatusEmail,type OrderEmailDetails} from "./transactional-email";
+import {customerAccountOrigin} from "./customer-account-origin";
 
 export type NotificationKind=
  | "ORDER_PLACED" | "PAYMENT_CONFIRMED" | "ORDER_PROCESSING"
@@ -57,7 +58,7 @@ export function buildOrderLifecyclePreview(kind:NotificationKind,details:OrderEm
 export function buildAccountActionNotice(kind:"ACCOUNT_VERIFICATION"|"PASSWORD_RESET",customerName:string,actionUrl:string){
  const name=safeName(customerName);
  const url=new URL(actionUrl);
- if(url.protocol!=="https:"||url.host!=="www.worldtreasures.co.za"||
+ if(url.protocol!=="https:"||url.origin!==customerAccountOrigin()||
   (kind==="ACCOUNT_VERIFICATION"?url.pathname!=="/account/verify":url.pathname!=="/account/reset"))
   throw new Error("Invalid account action URL");
  const heading=kind==="ACCOUNT_VERIFICATION"?"Verify your email address":"Reset your password";
