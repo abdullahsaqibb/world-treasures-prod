@@ -1,4 +1,5 @@
 import {createHash,randomBytes} from "node:crypto";
+import {customerAccountOrigin} from "./customer-account-origin";
 
 /** Tokens must remain server-side and are never logged or added to URLs by untrusted input. */
 export const CUSTOMER_CHALLENGE_TTL_MS=15*60*1000;
@@ -24,7 +25,7 @@ export function customerSessionExpiry(now=new Date()){
 }
 export function customerSignInUrl(token:string){
  hashCustomerToken(token);
- const url=new URL("https://www.worldtreasures.co.za/account/verify");
+ const url=new URL("/account/verify",customerAccountOrigin());
  url.searchParams.set("token",token);
  return url.toString();
 }
