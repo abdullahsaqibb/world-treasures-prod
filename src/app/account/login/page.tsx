@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type {Metadata} from "next";
+import {customerEmailTransportReady} from "@/lib/customer-email-transport";
 export const metadata:Metadata={title:"Customer sign in",robots:{index:false,follow:false}};
 export const dynamic="force-dynamic";
 export default async function CustomerLoginPage({searchParams}:{searchParams:Promise<{status?:string}>}){
  const {status}=await searchParams;
- const enabled=process.env.CUSTOMER_ACCOUNTS_ENABLED==="true";
+ const enabled=process.env.CUSTOMER_ACCOUNTS_ENABLED==="true"&&customerEmailTransportReady();
  return <main style={{maxWidth:540,margin:"8vh auto",padding:"24px 22px",fontFamily:"var(--body,Arial,sans-serif)"}}>
   <Link href="/" style={{fontWeight:800}}>← WORLD TREASURES</Link>
   <h1 style={{fontSize:"clamp(38px,6vw,62px)",margin:"38px 0 16px"}}>YOUR ACCOUNT</h1>
